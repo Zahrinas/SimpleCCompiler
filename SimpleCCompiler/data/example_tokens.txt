@@ -1,0 +1,6 @@
+int name(main) left_paren right_paren left_brace
+int name(a) comma name(b) semicolon
+name(scanf) left_paren string(%d%d) comma and name(a) comma and name(b) right_paren semicolon
+name(printf) left_paren string(%d) comma name(a) plus name(b) right_paren semicolon
+return const(0) semicolon
+right_brace
