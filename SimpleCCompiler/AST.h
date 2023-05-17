@@ -9,17 +9,20 @@ enum class AST_type {
 	call_inst,
 	int_type,
 	name, string, constant,
+	plus, minus, multiply, divide,
 
 
 	func_decl, label_decl,
 	void_type, float_type,
-	return_seq, if_seq, for_word, while_word,
-	goto_word
+	if_inst, for_inst, while_inst,
+	goto_inst
 };
 
-class AST_node {
+struct AST_node {
 	AST_type type;
+	void* ptr;
 
+	AST_node(AST_type t, void* p = nullptr);
 };
 
-typedef tree<TOKEN> AST;
+typedef tree<AST_node> AST;
