@@ -18,7 +18,7 @@
 %token <strval> ID
 %token SEMI COMMA ASSIGNOP
 %token EQ GE LE GT LT NE
-%token PLUS MINUS STAR DIV ADD_AND
+%token PLUS MINUS STAR DIV BAND
 %token AND OR NOT
 %token INT DOUBLE CHAR
 %token LP RP LB RB LC RC
@@ -38,10 +38,14 @@
 %right ASSIGNOP
 %left OR
 %left AND
-%left EQ GE LE GT LT NE
+%left BOR
+%left BNOR
+%left BAND
+%left EQ NE
+%left GE LE GT LT
 %left PLUS MINUS
-%left STAR DIV
-%right NOT
+%left STAR DIV MOD
+%right NOT UMINUS USTAR UBAND
 %left LB RB
 %left LP RP
 %nonassoc LOWER_THAN_ELSE
@@ -118,10 +122,15 @@ Exp : Exp ASSIGNOP Exp
     | Exp MINUS Exp
     | Exp STAR Exp
     | Exp DIV Exp
+    | Exp MOD Exp
+    | Exp BAND Exp
+    | Exp BOR Exp
+    | Exp BNOR Exp
     | LP Exp RP
-    | MINUS Exp
+    | MINUS Exp %prec UMINUS
     | NOT Exp
-    | ADD_AND Exp
+    | BAND Exp %prec UBAND
+    | STAR Exp %prec USTAR
     | ID LP Args RP
     | ID LP RP
     | Exp LB Exp RB

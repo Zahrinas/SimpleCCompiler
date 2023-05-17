@@ -30,6 +30,7 @@ Plus  \+
 Sub   \-
 Mul   \*
 Div   \/
+Mod   \%
 EQ    \==
 Assign \=
 GT    \>
@@ -38,7 +39,9 @@ LE    \<\=
 GE    \>\=
 NE    \!\=
 AND   \&\&
-ADD_AND   \&
+BAND  \&
+BNOR  \^
+BOR   \|
 OR    \|\|
 NOT   \!
 comma \,
@@ -131,6 +134,10 @@ semicolon \;
 			printf("div ");
             return DIV;
 		}
+{Mod}   {
+            printf("mod ");
+            return MOD;
+        }
 {EQ}   {
 			printf("eq ");
             return EQ;
@@ -163,9 +170,17 @@ semicolon \;
 			printf("AND ");
             return AND;
 		}
-{ADD_AND}   {
+{BAND}   {
             printf("ADD_AND ");
-            return ADD_AND;
+            return BAND;
+        }
+{BNOR}   {
+            printf("BNOR ");
+            return BNOR;
+        }
+{BOR}   {
+            printf("BOR ");
+            return BOR;
         }
 {OR}   {
 			printf("OR ");
