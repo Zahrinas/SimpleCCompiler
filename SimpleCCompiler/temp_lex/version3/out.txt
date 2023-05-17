@@ -1,0 +1,16 @@
+
+int name(main) left_paren right_paren left_brace 
+int name(a) comma name(b) semicolon 
+name(scanf) left_paren string("%d%d") comma AND name(a) comma AND name(b) right_paren semicolon 
+if left_paren name(a) big name(b) right_paren left_brace 
+name(printf) left_paren string("%d") comma name(a) sub name(b) right_paren semicolon 
+
+right_brace 
+else left_brace 
+name(printf) left_paren string("%d") comma name(a) plus name(b) right_paren semicolon 
+
+right_brace 
+
+return const(0) semicolon 
+right_brace 
+
