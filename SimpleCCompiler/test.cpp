@@ -78,7 +78,7 @@ AST getExampleAST() {
 	AST n5 = n2.insert(AST_node(AST_type::name, new std::string("b")));
 	AST n7 = n6.insert(AST_node(AST_type::call_inst));
 	AST n13 = n12.insert(AST_node(AST_type::call_inst));
-	AST n20 = n19.insert(AST_node(AST_type::call_inst));
+	AST n20 = n19.insert(AST_node(AST_type::constant, new int(0)));
 
 	AST n8 = n7.insert(AST_node(AST_type::name, new std::string("scanf")));
 	AST n9 = n7.insert(AST_node(AST_type::string, new std::string("%d%d")));
