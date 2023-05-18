@@ -1,14 +1,12 @@
 #pragma once
+#include <string>
 
 #include "tree.h"
 
 struct IRdata_LLVM {
-	string source_filename;
-	string 
-};
+	std::string source_filename;
+	std::string datalayout;
+	std::string triple;
 
-struct IRTOKEN {
-	int type;
+		
 };
-
-typedef tree<IRTOKEN> IR;
