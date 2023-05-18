@@ -39,7 +39,7 @@ GE    \>\=
 NE    \!\=
 AND   \&\&
 BAND  \&
-BNOR  \^
+BXOR  \^
 BOR   \|
 OR    \|\|
 NOT   \!
@@ -173,9 +173,9 @@ semicolon \;
             printf("ADD_AND ");
             return BAND;
         }
-{BNOR}   {
-            printf("BNOR ");
-            return BNOR;
+{BXOR}   {
+            printf("BXOR ");
+            return BXOR;
         }
 {BOR}   {
             printf("BOR ");
