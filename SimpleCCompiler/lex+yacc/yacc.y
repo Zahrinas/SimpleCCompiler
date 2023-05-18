@@ -1,7 +1,8 @@
 %{
     #include <stdio.h>
     #include <stdlib.h>
-    #include "AST.h"
+    #include <iostream>
+    // #include "AST.h"
     int yylex(void);
     void yyerror(char *);
 %}
@@ -25,12 +26,12 @@
 %token RETURN IF ELSE WHILE
 
 // non-terminals
-%type <> Program ExtDefList ExtDef ExtDecList   // High-level Definitions
-%type <> Specifier                              // Specifiers
-%type <> VarDec FunDec VarList ParamDec         // Declarators
-%type <> CompSt StmtList Stmt                   // Statements
-%type <> DefList Def Dec DecList                // Local Definitions
-%type <> Exp Args                               // Expressions
+/* %type Program ExtDefList ExtDef ExtDecList ExtDec    // High-level Definitions
+%type Specifier                                         // Specifiers
+%type VarDec FunDec VarList ParamDec                    // Declarators
+%type CompSt StmtList Stmt                              // Statements
+%type DefList Def Dec DecList                           // Local Definitions
+%type Exp Args                                          // Expressions */
 
 %start Program
 
@@ -62,8 +63,11 @@ ExtDef : Specifier ExtDecList SEMI  // global variable declaration, e.g. int a, 
     | Specifier SEMI    // global variable declaration, e.g. int;
     | Specifier FunDec CompSt;  // function definition, e.g. int main() { ... }
 
-ExtDecList : VarDec // variable definition, e.g. a[10][2]
-    | VarDec COMMA ExtDecList; // e.g. a, b, c
+ExtDecList : ExtDec
+    | ExtDec COMMA ExtDecList; // e.g. a, b, c
+
+ExtDec : VarDec  // variable definition, e.g. a[10][2]
+    | VarDec ASSIGNOP Exp;  // variable definition with initialization, e.g. a[10][2] = 1;
 
 // Specifiers
 Specifier : INT
@@ -141,3 +145,16 @@ Exp : Exp ASSIGNOP Exp
 
 Args : Exp COMMA Args
     | Exp
+%%
+
+void yyerror(char *str) {
+    fprintf(stderr, "error:%s\n", str);
+}
+
+int yywrap() {
+    return 1;
+}
+ 
+int main() {
+    yyparse();
+}
