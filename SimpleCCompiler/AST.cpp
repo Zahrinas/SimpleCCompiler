@@ -1,6 +1,6 @@
 #include "AST.h"
 
-AST_node::AST_node(AST_type t, void* p = nullptr) {
+AST_node::AST_node(AST_type t, datum d) {
 	this->type = t;
-	this->ptr = p;
+	this->data = d;
 }

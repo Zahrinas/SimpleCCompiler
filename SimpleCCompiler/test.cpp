@@ -74,22 +74,22 @@ AST getExampleAST() {
 	AST n19 = n1.insert(AST_node(AST_type::return_inst));
 
 	AST n3 = n2.insert(AST_node(AST_type::int_type));
-	AST n4 = n2.insert(AST_node(AST_type::name, new std::string("a")));
-	AST n5 = n2.insert(AST_node(AST_type::name, new std::string("b")));
+	AST n4 = n2.insert(AST_node(AST_type::name, datum("a")));
+	AST n5 = n2.insert(AST_node(AST_type::name, datum("b")));
 	AST n7 = n6.insert(AST_node(AST_type::call_inst));
 	AST n13 = n12.insert(AST_node(AST_type::call_inst));
-	AST n20 = n19.insert(AST_node(AST_type::constant, new int(0)));
+	AST n20 = n19.insert(AST_node(AST_type::constant, datum(0)));
 
-	AST n8 = n7.insert(AST_node(AST_type::name, new std::string("scanf")));
-	AST n9 = n7.insert(AST_node(AST_type::string, new std::string("%d%d")));
-	AST n10 = n7.insert(AST_node(AST_type::name, new std::string("a")));
-	AST n11 = n7.insert(AST_node(AST_type::name, new std::string("b")));
-	AST n14 = n13.insert(AST_node(AST_type::name, new std::string("printf")));
-	AST n15 = n13.insert(AST_node(AST_type::string, new std::string("%d")));
+	AST n8 = n7.insert(AST_node(AST_type::name, datum("scanf")));
+	AST n9 = n7.insert(AST_node(AST_type::string, datum("%d%d")));
+	AST n10 = n7.insert(AST_node(AST_type::name, datum("a")));
+	AST n11 = n7.insert(AST_node(AST_type::name, datum("b")));
+	AST n14 = n13.insert(AST_node(AST_type::name, datum("printf")));
+	AST n15 = n13.insert(AST_node(AST_type::string, datum("%d")));
 	AST n16 = n13.insert(AST_node(AST_type::plus));
 
-	AST n17 = n16.insert(AST_node(AST_type::name, new std::string("a")));
-	AST n18 = n16.insert(AST_node(AST_type::name, new std::string("b")));
+	AST n17 = n16.insert(AST_node(AST_type::name, datum("a")));
+	AST n18 = n16.insert(AST_node(AST_type::name, datum("b")));
 
 	return n1;
 }

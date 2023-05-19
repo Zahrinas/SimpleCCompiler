@@ -1,9 +1,21 @@
 #pragma once
+#include <string>
+#include <vector>
 
-#include "tree.h"
+#include "base.h"
 
-struct IRTOKEN {
-	int type;
+struct IRdata_funct {
+
 };
 
-typedef tree<IRTOKEN> IR;
+struct IRdata_LLVM {
+    std::string source_filename;
+    std::string datalayout;
+    std::string triple;
+
+    std::vector<string> string_globals;
+    std::vector<int> int_globals;
+    std::vector<double> double_globals;
+
+
+};

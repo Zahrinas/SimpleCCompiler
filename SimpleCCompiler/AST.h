@@ -1,6 +1,6 @@
 #pragma once
 
-#include "tree.h"
+#include "base.h"
 #include "test.h"
 
 enum class AST_type {
@@ -9,20 +9,20 @@ enum class AST_type {
     call_inst,
     int_type,
     name, string, constant,
-    plus, minus, multiply, divide, and, or , not, mod, assign, equal, not_equal, greater, less, greater_equal, less_equal, band, bor, bxor,
+    plus, minus, multiply, divide,
 
 
     func_decl, label_decl,
-    void_type, double_type,
+    void_type, float_type,
     if_inst, for_inst, while_inst,
     goto_inst
 };
 
 struct AST_node {
     AST_type type;
-    void *ptr;
+    datum data;
 
-    AST_node(AST_type t, void *p = nullptr);
+    AST_node(AST_type t, datum d = datum());
 };
 
 typedef tree<AST_node> AST;
