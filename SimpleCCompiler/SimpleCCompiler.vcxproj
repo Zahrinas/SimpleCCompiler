@@ -139,17 +139,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ast2ir.cpp" />
+    <ClCompile Include="AST.cpp" />
+    <ClCompile Include="IR.cpp" />
     <ClCompile Include="data\example.c" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="test.cpp" />
-    <ClCompile Include="tree.cpp" />
+    <ClCompile Include="base.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AST.h" />
     <ClInclude Include="IR.h" />
     <ClInclude Include="test.h" />
-    <ClInclude Include="tree.h" />
+    <ClInclude Include="base.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="data\clang.txt" />

@@ -10,10 +10,6 @@ using namespace std;
 
 string fileName;
 signed main(signed, char**, char**) {
-	cin >> fileName;
-
-	AST ast;
-	//AST ast = file2ast(fileName);
-
-	IR ir = ast2ir(ast);
+	AST ast = getExampleAST();
+	IRdata_LLVM ir = ast2ir(ast);
 }

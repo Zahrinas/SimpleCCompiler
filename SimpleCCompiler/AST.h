@@ -4,6 +4,7 @@
 #include "test.h"
 
 enum class AST_type {
+	func_decl,
 	seq_tree, eseq_tree,
 	decl_inst, return_inst,
 	call_inst,
@@ -12,17 +13,23 @@ enum class AST_type {
 	plus, minus, multiply, divide,
 
 
-	func_decl, label_decl,
+	label_decl,
 	void_type, float_type,
 	if_inst, for_inst, while_inst,
 	goto_inst
+
 };
 
 struct AST_node {
 	AST_type type;
-	datum data;
+	datum value;
 
-	AST_node(AST_type t, datum d = datum());
+	AST_node(AST_type t, datum v = datum());
 };
 
 typedef tree<AST_node> AST;
+
+dataType toDataType(AST_type t) {
+	if (t == AST_type::int_type) return dataType::intType;
+	else throw unexpected;
+}
