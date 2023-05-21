@@ -1,7 +1,6 @@
 #pragma once
 
 #include "base.h"
-#include "test.h"
 
 enum class AST_type {
 	func_decl,
@@ -29,7 +28,4 @@ struct AST_node {
 
 typedef tree<AST_node> AST;
 
-dataType toDataType(AST_type t) {
-	if (t == AST_type::int_type) return dataType::intType;
-	else throw unexpected;
-}
+dataType toDataType(AST_type t);

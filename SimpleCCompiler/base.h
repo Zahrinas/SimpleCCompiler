@@ -9,7 +9,7 @@ struct tree {
 	std::vector<tree> son;
 
 	tree(T data);
-	tree insert(T data);
+	tree<T> insert(T data);
 };
 
 enum class dataType {
@@ -29,6 +29,7 @@ struct datum {
 	int getDataInt();
 	double getDataDouble();
 	std::string getDataString();
+	std::string toStringExpr();
 };
 
 struct variable {
@@ -39,3 +40,14 @@ struct variable {
 };
 
 std::string getLLVM_type(dataType dt);
+
+template <typename T>
+tree<T>::tree(T data) : data(data){
+}
+
+template <typename T>
+tree<T> tree<T>::insert(T data) {
+	tree<T> that = tree<T>(data);
+	son.push_back(that);
+	return that;
+}

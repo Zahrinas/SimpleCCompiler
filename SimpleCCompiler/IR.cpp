@@ -1,3 +1,5 @@
+#include <fstream>
+
 #include "AST.h"
 #include "IR.h"
 
@@ -11,6 +13,8 @@ IR_funct IRdata_LLVM::parseFunct(AST ast) {
 	ret.name = ast.son[1].data.value.getDataString();
 
 	parseSequence(ret, ast.son[2]);
+
+	return ret;
 }
 
 datum IRdata_LLVM::parseSequence(IR_funct fun, AST ast) {
@@ -38,9 +42,16 @@ datum IRdata_LLVM::parseSequence(IR_funct fun, AST ast) {
 		return datum();
 	}
 	case AST_type::call_inst: {
+		
 	}
 	case AST_type::return_inst: {
-
+		if (ast.son[0].data.type == AST_type::constant) {
+			fun.body.push_back("ret " + getLLVM_type(ast.son[0].data.value.type) + " " + ast.son[0].data.value.toStringExpr());
+		}
+		else if (ast.son[0].data.type == AST_type::name) {
+			//to be editted
+		}
+		else throw unexpected;
 	}
 	default: {
 		throw unexpected;
@@ -89,5 +100,25 @@ void IRdata_LLVM::getFunctsFrom(AST ast) {
 		if (ast.data.type == AST_type::func_decl) {
 			functs.push_back(parseFunct(ast));
 		}
+	}
+}
+
+void IRdata_LLVM::printIR(std::string filename) {
+	std::ofstream fout(filename);
+
+	fout << "source_filename = \"" << source_filename << "\"" << std::endl;
+	fout << "target datalayout = \"" << datalayout << "\"" << std::endl;
+	fout << "target triple = \"" << triple << "\"" << std::endl;
+
+	for (int i = 0; i < globals.size(); ++i) {
+		fout << "@." << i << " = constant " << globals[i].toStringExpr() <<std::endl;
+	}
+
+	for (int i = 0; i < functs.size(); ++i) {
+		fout << "define " << getLLVM_type(functs[i].returnType) << " @" << functs[i].name << "() {";
+		for (int j = 0; j < functs[i].body.size(); ++j) {
+			fout << functs[i].body[j] << std::endl;
+		}
+		fout << "}" << std::endl;
 	}
 }

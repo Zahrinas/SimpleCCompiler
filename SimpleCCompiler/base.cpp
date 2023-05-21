@@ -1,17 +1,5 @@
 #include "base.h"
 
-template <typename T>
-tree<T>::tree(T data) {
-	this->data = data;
-}
-
-template <typename T>
-tree<T> tree<T>::insert(T data) {
-	tree that = tree(data);
-	tree.son.insert(that);
-	return that;
-}
-
 datum::datum() {
 	this->type = dataType::voidType;
 	this->ptr = nullptr;
@@ -50,6 +38,17 @@ double datum::getDataDouble() {
 
 std::string datum::getDataString() {
 	return *(std::string*)ptr;
+}
+
+std::string datum::toStringExpr() {
+	if (type == dataType::intType) return std::to_string(*(int*)ptr);
+	else if (type == dataType::doubleType) return std::to_string(*(double*)ptr);
+	else if (type == dataType::stringType) {
+		std::string s = *(std::string*)ptr;
+		int len = s.length();
+		return "[" + std::to_string(len) + " x i8] c\"" + s + "\\00\"";
+	}
+	else throw unexpected;
 }
 
 variable::variable(std::string s, datum d) {
