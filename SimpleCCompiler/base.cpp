@@ -3,14 +3,12 @@
 template <typename T>
 tree<T>::tree(T data) {
 	this->data = data;
-	this->son = this->brother = nullptr;
 }
 
 template <typename T>
 tree<T> tree<T>::insert(T data) {
 	tree that = tree(data);
-	for (tree* s = this->son; s->brother; s = s->brother);
-	s->brother = that;
+	tree.son.insert(that);
 	return that;
 }
 
@@ -32,4 +30,34 @@ datum::datum(double d) {
 datum::datum(std::string s) {
 	this->type = dataType::stringType;
 	this->ptr = new std::string(s);
+}
+
+datum::datum(dataType dt) {
+	this->type = dt;
+	if (dt == dataType::intType) this->ptr = new int();
+	else if (dt == dataType::doubleType) this->ptr = new double();
+	else if (dt == dataType::stringType) this->ptr = new std::string();
+	else throw unexpected;
+}
+
+int datum::getDataInt() {
+	return *(int*)ptr;
+}
+
+double datum::getDataDouble() {
+	return *(double*)ptr;
+}
+
+std::string datum::getDataString() {
+	return *(std::string*)ptr;
+}
+
+variable::variable(std::string s, datum d) {
+	this->name = s;
+	this->data = d;
+}
+
+std::string getLLVM_type(dataType dt) {
+	if (dt == dataType::intType) return "i32";
+	else throw unexpected;
 }

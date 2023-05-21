@@ -66,7 +66,12 @@
 	son: null
 */
 AST getExampleAST() {
-	AST n1 = AST(AST_node(AST_type::seq_tree));
+	AST n0 = AST(AST_node(AST_type::func_decl));
+
+	AST nx1 = n0.insert(AST_node(AST_type::int_type));
+	AST nx2 = n0.insert(AST_node(AST_type::name, datum("main")));
+
+	AST n1 = n0.insert(AST_node(AST_type::seq_tree));
 
 	AST n2 = n1.insert(AST_node(AST_type::decl_inst));
 	AST n6 = n1.insert(AST_node(AST_type::eseq_tree));
@@ -91,5 +96,5 @@ AST getExampleAST() {
 	AST n17 = n16.insert(AST_node(AST_type::name, datum("a")));
 	AST n18 = n16.insert(AST_node(AST_type::name, datum("b")));
 
-	return n1;
+	return n0;
 }

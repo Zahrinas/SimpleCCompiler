@@ -14,7 +14,7 @@ enum class AST_type {
     array, // 暂时用array表示
 
     func_decl, label_decl,
-    void_type, double_type,
+    void_type, float_type,
     if_inst, for_inst, while_inst,
     goto_inst
 };
