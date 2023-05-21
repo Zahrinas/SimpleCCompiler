@@ -11,7 +11,7 @@ using namespace std;
 
 string fileName;
 signed main(signed, char**, char**) {
-	AST ast = getExampleAST();
-	IRdata_LLVM ir = ast2ir(ast);
-	ir.printIR("ir.ll");
+	AST* ast = getExampleAST();
+	IRdata_LLVM ir = ast2ir(*ast);
+	ir.printIR("data/gen.ll");
 }

@@ -3,6 +3,7 @@
 #include "base.h"
 
 enum class AST_type {
+	program,
 	func_decl,
 	seq_tree, eseq_tree,
 	decl_inst, return_inst,

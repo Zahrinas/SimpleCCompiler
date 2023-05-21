@@ -33,7 +33,7 @@ struct IRdata_LLVM {
 	void getFunctsFrom(AST ast);
 
 	IR_funct parseFunct(AST ast);
-	datum parseSequence(IR_funct fun, AST ast);
+	datum parseSequence(IR_funct& fun, AST ast);
 
 	void printIR(std::string filename);
 };
