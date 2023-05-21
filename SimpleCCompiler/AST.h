@@ -9,11 +9,12 @@ enum class AST_type {
     call_inst,
     int_type,
     name, string, constant,
-    plus, minus, multiply, divide,
+    plus, minus, multiply, divide, and, or , not, mod, assign, equal, not_equal, greater, less, greater_equal, less_equal, band, bor, bxor,
 
+    array, // 暂时用array表示
 
     func_decl, label_decl,
-    void_type, float_type,
+    void_type, double_type,
     if_inst, for_inst, while_inst,
     goto_inst
 };
