@@ -1,9 +1,8 @@
 %{
     #include <string.h>
     #include "y.tab.h"
-    int statue;
-    char name[20];
 
+    char name[20];
     int val_int = 0;
     double val_double = 0;
 %}
@@ -40,7 +39,7 @@ GE    \>\=
 NE    \!\=
 AND   \&\&
 BAND  \&
-BNOR  \^
+BXOR  \^
 BOR   \|
 OR    \|\|
 NOT   \!
@@ -174,9 +173,9 @@ semicolon \;
             printf("ADD_AND ");
             return BAND;
         }
-{BNOR}   {
-            printf("BNOR ");
-            return BNOR;
+{BXOR}   {
+            printf("BXOR ");
+            return BXOR;
         }
 {BOR}   {
             printf("BOR ");
@@ -193,21 +192,25 @@ semicolon \;
 {VAR}   {
 			strcpy(name, yytext);
 			printf("name(%s) ",name);
+            yylval.strval = name;
             return ID;
 		}
 {IVALUE} {
 			sscanf(yytext, "%d", &val_int);
 			printf("const(%d) ", val_int);
+            yylval.intval = val_int;
             return INTEGER;
 		}
 {DVALUE} {
 			sscanf(yytext, "%lf", &val_double);
 			printf("const(%lf) ", val_double);
+            yylval.doubleval = val_double;
             return REAL;
 		}
 {String} {
 	        strcpy(name, yytext);
 			printf("string(%s) ", name);
+            yylval.strval = name;
             return STRING;
 		}
 {Include} {
@@ -218,7 +221,7 @@ semicolon \;
 
 %%
 
-int main(int argc, char **argv) {
+/* int main(int argc, char **argv) {
   if (argc > 1) {
     FILE *file;
 	file = fopen(argv[1], "r");
@@ -236,7 +239,7 @@ int main(int argc, char **argv) {
   
   yylex();
   yywrap();
-}
+} */
 
 int yywrap() {
 	return 1;

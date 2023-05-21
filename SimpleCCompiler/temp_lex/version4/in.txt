@@ -1,0 +1,15 @@
+#include<stdio.h>
+int main() {
+    int a, b;
+    char* mine;
+    double k = 1.02;
+    scanf("%d%d", &a, &b);
+    if (a >= b){
+        a = !b;
+    }
+    else {
+        a = a && b;
+    }
+
+    return 0;
+}
