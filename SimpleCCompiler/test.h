@@ -2,4 +2,4 @@
 
 #include "AST.h"
 
-AST getExampleAST();
+AST* getExampleAST();

@@ -35,6 +35,8 @@ struct IRdata_LLVM {
 
     IR_funct parseFunct(AST ast);
     datum parseSequence(IR_funct fun, AST ast);
+
+    void printIR(std::string filename);
 };
 
 IRdata_LLVM ast2ir(AST ast);

@@ -3,12 +3,13 @@
 #include "base.h"
 
 enum class AST_type {
+    func_decl,
     seq_tree, eseq_tree,
     decl_inst, return_inst,
     call_inst,
     int_type,
     name, string, constant,
-    plus, minus, multiply, divide, and, or , not, mod, assign, equal, not_equal, greater, less, greater_equal, less_equal, band, bor, bxor,
+    plus, minus, multiply, divide,
 
     array, // 暂时用array表示
 

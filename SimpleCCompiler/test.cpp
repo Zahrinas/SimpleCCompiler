@@ -65,36 +65,23 @@
 	brother: null
 	son: null
 */
-AST getExampleAST() {
-	AST n0 = AST(AST_node(AST_type::func_decl));
+AST* getExampleAST() {
+	AST* nr = new AST(AST_node(AST_type::program));
 
-	AST nx1 = n0.insert(AST_node(AST_type::int_type));
-	AST nx2 = n0.insert(AST_node(AST_type::name, datum("main")));
+	AST* n0 = nr->insert(AST_node(AST_type::func_decl));
 
-	AST n1 = n0.insert(AST_node(AST_type::seq_tree));
+	AST* nx1 = n0->insert(AST_node(AST_type::int_type));
+	AST* nx2 = n0->insert(AST_node(AST_type::name, datum("main")));
 
-	AST n2 = n1.insert(AST_node(AST_type::decl_inst));
-	AST n6 = n1.insert(AST_node(AST_type::eseq_tree));
-	AST n12 = n1.insert(AST_node(AST_type::eseq_tree));
-	AST n19 = n1.insert(AST_node(AST_type::return_inst));
+	AST* n1 = n0->insert(AST_node(AST_type::seq_tree));
 
-	AST n3 = n2.insert(AST_node(AST_type::int_type));
-	AST n4 = n2.insert(AST_node(AST_type::name, datum("a")));
-	AST n5 = n2.insert(AST_node(AST_type::name, datum("b")));
-	AST n7 = n6.insert(AST_node(AST_type::call_inst));
-	AST n13 = n12.insert(AST_node(AST_type::call_inst));
-	AST n20 = n19.insert(AST_node(AST_type::constant, datum(0)));
+	AST* n2 = n1->insert(AST_node(AST_type::decl_inst));
+	AST* n19 = n1->insert(AST_node(AST_type::return_inst));
 
-	AST n8 = n7.insert(AST_node(AST_type::name, datum("scanf")));
-	AST n9 = n7.insert(AST_node(AST_type::string, datum("%d%d")));
-	AST n10 = n7.insert(AST_node(AST_type::name, datum("a")));
-	AST n11 = n7.insert(AST_node(AST_type::name, datum("b")));
-	AST n14 = n13.insert(AST_node(AST_type::name, datum("printf")));
-	AST n15 = n13.insert(AST_node(AST_type::string, datum("%d")));
-	AST n16 = n13.insert(AST_node(AST_type::plus));
+	AST* n3 = n2->insert(AST_node(AST_type::int_type));
+	AST* n4 = n2->insert(AST_node(AST_type::name, datum("a")));
+	AST* n5 = n2->insert(AST_node(AST_type::name, datum("b")));
+	AST* n20 = n19->insert(AST_node(AST_type::constant, datum(0)));
 
-	AST n17 = n16.insert(AST_node(AST_type::name, datum("a")));
-	AST n18 = n16.insert(AST_node(AST_type::name, datum("b")));
-
-	return n0;
+	return nr;
 }

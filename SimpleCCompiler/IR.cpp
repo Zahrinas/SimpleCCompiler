@@ -9,35 +9,35 @@ binding::binding(variable v, int l) : var(v), loc(l) {
 IR_funct IRdata_LLVM::parseFunct(AST ast) {
 	IR_funct ret;
 	ret.defined = true;
-	ret.returnType = ast.son[0].data.value.type;
-	ret.name = ast.son[1].data.value.getDataString();
+	ret.returnType = toDataType(ast.son[0]->data.type);
+	ret.name = ast.son[1]->data.value.getDataString();
 
-	parseSequence(ret, ast.son[2]);
+	parseSequence(ret, *ast.son[2]);
 
 	return ret;
 }
 
-datum IRdata_LLVM::parseSequence(IR_funct fun, AST ast) {
+datum IRdata_LLVM::parseSequence(IR_funct& fun, AST ast) {
 	switch (ast.data.type) {
 	case AST_type::seq_tree: {
 		for (int i = 0; i < ast.son.size(); ++i) {
-			parseSequence(fun, ast.son[i]);
+			parseSequence(fun, *ast.son[i]);
 		}
 		return datum();
 	}
 	case AST_type::eseq_tree: {
 		datum ret;
 		for (int i = 0; i < ast.son.size(); ++i) {
-			ret = parseSequence(fun, ast.son[i]);
+			ret = parseSequence(fun, *ast.son[i]);
 		}
 		return ret;
 	}
 	case AST_type::decl_inst: {
-		dataType dt = toDataType(ast.son[0].data.type);
-		int sent = fun.body.size() + 1;
+		dataType dt = toDataType(ast.son[0]->data.type);
 		for (int i = 1; i < ast.son.size(); ++i) {
-			fun.body.push_back("%" + std::to_string(sent) + " = alloca " + getLLVM_type(dt));
-			fun.bind.push_back(binding(variable(ast.son[i].data.value.getDataString(), datum(dt)), sent));
+			int sent = fun.body.size() + 1;
+			fun.body.push_back("%" + std::to_string(sent) + " = alloca " + ast.son[i]->data.value.toLLVM_type());
+			fun.bind.push_back(binding(variable(ast.son[i]->data.value.getDataString(), datum(dt)), sent));
 		}
 		return datum();
 	}
@@ -45,13 +45,12 @@ datum IRdata_LLVM::parseSequence(IR_funct fun, AST ast) {
 		
 	}
 	case AST_type::return_inst: {
-		if (ast.son[0].data.type == AST_type::constant) {
-			fun.body.push_back("ret " + getLLVM_type(ast.son[0].data.value.type) + " " + ast.son[0].data.value.toStringExpr());
-		}
-		else if (ast.son[0].data.type == AST_type::name) {
+		if (ast.son[0]->data.type == AST_type::constant) {
+			fun.body.push_back("ret " + ast.son[0]->data.value.toLLVM_type() + " " + ast.son[0]->data.value.toStringExpr());
+		} else if (ast.son[0]->data.type == AST_type::name) {
 			//to be editted
-		}
-		else throw unexpected;
+		} else throw unexpected;
+		break;
 	}
 	default: {
 		throw unexpected;
@@ -88,7 +87,7 @@ void IRdata_LLVM::getGlobalsFrom(AST ast) {
 	}
 	default: {
 		for (int i = 0; i < ast.son.size(); ++i) {
-			getGlobalsFrom(ast.son[i]);
+			getGlobalsFrom(*ast.son[i]);
 		}
 		break;
 	}
@@ -96,9 +95,9 @@ void IRdata_LLVM::getGlobalsFrom(AST ast) {
 }
 
 void IRdata_LLVM::getFunctsFrom(AST ast) {
-	for (auto itr = ast.son.begin(); itr != ast.son.end(); ++itr) {
-		if (ast.data.type == AST_type::func_decl) {
-			functs.push_back(parseFunct(ast));
+	for (int i = 0; i < ast.son.size(); ++i) {
+		if(ast.son[i]->data.type == AST_type::func_decl) {
+			functs.push_back(parseFunct(*ast.son[i]));
 		}
 	}
 }
@@ -111,14 +110,17 @@ void IRdata_LLVM::printIR(std::string filename) {
 	fout << "target triple = \"" << triple << "\"" << std::endl;
 
 	for (int i = 0; i < globals.size(); ++i) {
-		fout << "@." << i << " = constant " << globals[i].toStringExpr() <<std::endl;
+		fout << "@." << i << " = constant " << globals[i].toLLVM_type() << " " << globals[i].toStringExpr() << std::endl;
 	}
 
 	for (int i = 0; i < functs.size(); ++i) {
-		fout << "define " << getLLVM_type(functs[i].returnType) << " @" << functs[i].name << "() {";
+		fout << "define " << datum(functs[i].returnType).toLLVM_type() << " @" << functs[i].name << "() {" << std::endl;
 		for (int j = 0; j < functs[i].body.size(); ++j) {
-			fout << functs[i].body[j] << std::endl;
+			fout << "  " << functs[i].body[j] << std::endl;
 		}
 		fout << "}" << std::endl;
 	}
+
+	fout << "declare i32 @__isoc99_scanf(i8*, ...)" << std::endl;
+	fout << "declare i32 @printf(i8*, ...)" << std::endl;
 }
