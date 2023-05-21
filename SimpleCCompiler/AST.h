@@ -1,7 +1,6 @@
 #pragma once
 
 #include "base.h"
-#include "test.h"
 
 enum class AST_type {
     seq_tree, eseq_tree,
@@ -26,4 +25,12 @@ struct AST_node {
     AST_node(AST_type t, datum d = datum());
 };
 
+<<<<<< < HEAD
+    typedef tree<AST_node> AST;
+====== =
 typedef tree<AST_node> AST;
+
+dataType toDataType(AST_type t) {
+    if (t == AST_type::int_type) return dataType::intType;
+    else throw unexpected;
+}
