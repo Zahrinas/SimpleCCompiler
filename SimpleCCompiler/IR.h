@@ -6,18 +6,19 @@
 #include "AST.h"
 
 struct binding {
-	variable var;
-	int loc;
+	AST_node v;
+	std::string name;
 
-	binding(variable v, int l);
+	binding(AST_node v, std::string n);
 };
 
 struct IR_funct {
-	bool defined;
-	dataType returnType;
+	dataType type;
 	std::string name;
 	std::vector<binding> bind;
 	std::vector<std::string> body;
+
+	std::string toLLVM_type();
 };
 
 struct IRdata_LLVM {
@@ -25,7 +26,8 @@ struct IRdata_LLVM {
 	std::string datalayout;
 	std::string triple;
 
-	std::vector<datum> globals;
+	std::vector<bool> constant;
+	std::vector<AST_node> globals;
 	std::vector<IR_funct> functs;
 
 	void parseAST(AST ast);
@@ -35,6 +37,8 @@ struct IRdata_LLVM {
 	IR_funct parseFunct(AST ast);
 	datum parseSequence(IR_funct& fun, AST ast);
 
+	std::string getVarType(IR_funct& fun, AST_node v);
+	std::string getVarId(IR_funct& fun, AST_node v);
 	void printIR(std::string filename);
 };
 

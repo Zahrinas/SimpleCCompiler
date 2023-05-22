@@ -13,7 +13,19 @@ struct tree {
 };
 
 enum class dataType {
-	voidType, intType, doubleType, stringType
+	program,
+	func_decl,
+	seq_tree, eseq_tree,
+	decl_inst, return_inst,
+	call_inst,
+	void_type, int_type, double_type, pointer_type,
+	name, string, constant,
+	plus, minus, multiply, divide,
+
+
+	label_decl,
+	if_inst, for_inst, while_inst,
+	goto_inst
 };
 
 struct datum {
@@ -23,13 +35,13 @@ struct datum {
 	datum(int i);
 	datum(double d);
 	datum(std::string s);
-	datum(dataType dt = dataType::voidType);
+	datum(dataType dt = dataType::void_type);
+
+	bool operator==(datum b);
 
 	int getDataInt();
 	double getDataDouble();
 	std::string getDataString();
-	std::string toLLVM_type();
-	std::string toStringExpr();
 };
 
 struct variable {

@@ -2,31 +2,14 @@
 
 #include "base.h"
 
-enum class AST_type {
-	program,
-	func_decl,
-	seq_tree, eseq_tree,
-	decl_inst, return_inst,
-	call_inst,
-	int_type,
-	name, string, constant,
-	plus, minus, multiply, divide,
-
-
-	label_decl,
-	void_type, float_type,
-	if_inst, for_inst, while_inst,
-	goto_inst
-
-};
 
 struct AST_node {
-	AST_type type;
+	dataType type;
 	datum value;
 
-	AST_node(AST_type t, datum v = datum());
+	AST_node(dataType t, datum v = datum());
+	std::string toLLVM_type();
+	std::string toStringExpr();
 };
 
 typedef tree<AST_node> AST;
-
-dataType toDataType(AST_type t);
