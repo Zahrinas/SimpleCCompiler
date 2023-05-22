@@ -111,22 +111,22 @@ Specifier : INT {
 
 // Declarators
 VarDec : ID {
-    $$ = new AST(new AST_node(AST_type::name, new std::string($1)));    // ! 应该是这样写的吧
+    $$ = new AST(new AST_node(AST_type::name, datum($1)));    // ! 应该是这样写的吧
 }
     | VarDec LB INTEGER RB {
     $$ = new AST(new AST_node(AST_type::array));    // ! 数组要怎么表示？
     $$->son = $1;
-    $$->son->brother = new AST(new AST_node(AST_type::constant, new int($3)));
+    $$->son->brother = new AST(new AST_node(AST_type::constant, datum($3)));
 }; // e.g. a[10]
 
 FunDec : ID LP VarList RP {
     $$ = new AST(new AST_node(AST_type::func_decl));
-    $$->son = new AST(new AST_node(AST_type::name, new std::string($1)));
+    $$->son = new AST(new AST_node(AST_type::name, datum($1)));
     $$->son->brother = $3;
 }   // e.g. foo(int x, float y[10])
     | ID LP RP {
     $$ = new AST(new AST_node(AST_type::func_decl));
-    $$->son = new AST(new AST_node(AST_type::name, new std::string($1)));
+    $$->son = new AST(new AST_node(AST_type::name, datum($1)));
 }; // e.g. foo()
 
 VarList : ParamDec COMMA VarList {
@@ -331,12 +331,12 @@ Exp : Exp ASSIGNOP Exp {
 }
     | ID LP Args RP {
     $$ = new AST(new AST_node(AST_type::call_inst));
-    $$->son = new AST(new AST_node(AST_type::name, new std::string($1)));
+    $$->son = new AST(new AST_node(AST_type::name, datum($1)));
     $$->son->brother = $3;
 }
     | ID LP RP {
     $$ = new AST(new AST_node(AST_type::call_inst));
-    $$->son = new AST(new AST_node(AST_type::name, new std::string($1)));
+    $$->son = new AST(new AST_node(AST_type::name, datum($1)));
 }
     | Exp LB Exp RB {
     $$ = new AST(new AST_node(AST_type::array)); // ! 这里访问数组内存要用什么节点？
@@ -344,16 +344,16 @@ Exp : Exp ASSIGNOP Exp {
     $$->son->brother = $3;
 }
     | ID {
-    $$ = new AST(new AST_node(AST_type::name, new std::string($1)));
+    $$ = new AST(new AST_node(AST_type::name, datum($1)));
 }
     | INTEGER {
-    $$ = new AST(new AST_node(AST_type::constant, new int($1)));
+    $$ = new AST(new AST_node(AST_type::constant, datum($1)));
 }
     | REAL {
-    $$ = new AST(new AST_node(AST_type::constant, new double($1)));
+    $$ = new AST(new AST_node(AST_type::constant, datum($1)));
 }
     | STRING {
-    $$ = new AST(new AST_node(AST_type::string, new std::string($1)));
+    $$ = new AST(new AST_node(AST_type::string, datum($1)));
 };
 
 Args : Exp COMMA Args {
