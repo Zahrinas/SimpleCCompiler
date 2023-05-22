@@ -42,14 +42,26 @@ datum IRdata_LLVM::parseSequence(IR_funct& fun, AST ast) {
 		return datum();
 	}
 	case AST_type::call_inst: {
-		
+		if (ast.son[0]->data.value.getDataString() == "scanf") {
+			int sent = fun.body.size() + 1;
+			string str = ;
+			fun.body.push_back("%" + std::to_string(sent) + " = call i32 (i8*, ...) @__isoc99_scanf(" + )
+		}
+		else if (ast.son[0]->data.value.getDataString() == "printf") {
+
+		}
+		else {
+
+		}
 	}
 	case AST_type::return_inst: {
 		if (ast.son[0]->data.type == AST_type::constant) {
 			fun.body.push_back("ret " + ast.son[0]->data.value.toLLVM_type() + " " + ast.son[0]->data.value.toStringExpr());
-		} else if (ast.son[0]->data.type == AST_type::name) {
+		}
+		else if (ast.son[0]->data.type == AST_type::name) {
 			//to be editted
-		} else throw unexpected;
+		}
+		else throw unexpected;
 		break;
 	}
 	default: {
