@@ -1,0 +1,5 @@
+clang -S -emit-llvm example.c
+clang example.ll -o example.exe
+
+clang -S -emit-llvm example.c
+clang exampler.ll -o example

@@ -65,31 +65,37 @@
 	brother: null
 	son: null
 */
-AST getExampleAST() {
-	AST n1 = AST(AST_node(AST_type::seq_tree));
+AST* getExampleAST() {
+	AST* nr = new AST(AST_node(dataType::program));
 
-	AST n2 = n1.insert(AST_node(AST_type::decl_inst));
-	AST n6 = n1.insert(AST_node(AST_type::eseq_tree));
-	AST n12 = n1.insert(AST_node(AST_type::eseq_tree));
-	AST n19 = n1.insert(AST_node(AST_type::return_inst));
+	AST* n0 = nr->insert(AST_node(dataType::func_decl));
 
-	AST n3 = n2.insert(AST_node(AST_type::int_type));
-	AST n4 = n2.insert(AST_node(AST_type::name, new std::string("a")));
-	AST n5 = n2.insert(AST_node(AST_type::name, new std::string("b")));
-	AST n7 = n6.insert(AST_node(AST_type::call_inst));
-	AST n13 = n12.insert(AST_node(AST_type::call_inst));
-	AST n20 = n19.insert(AST_node(AST_type::constant, new int(0)));
+	AST* nx1 = n0->insert(AST_node(dataType::int_type));
+	AST* nx2 = n0->insert(AST_node(dataType::name, datum("main")));
+	AST* n1 = n0->insert(AST_node(dataType::seq_tree));
 
-	AST n8 = n7.insert(AST_node(AST_type::name, new std::string("scanf")));
-	AST n9 = n7.insert(AST_node(AST_type::string, new std::string("%d%d")));
-	AST n10 = n7.insert(AST_node(AST_type::name, new std::string("a")));
-	AST n11 = n7.insert(AST_node(AST_type::name, new std::string("b")));
-	AST n14 = n13.insert(AST_node(AST_type::name, new std::string("printf")));
-	AST n15 = n13.insert(AST_node(AST_type::string, new std::string("%d")));
-	AST n16 = n13.insert(AST_node(AST_type::plus));
+	AST* n2 = n1->insert(AST_node(dataType::decl_inst));
+	AST* n6 = n1->insert(AST_node(dataType::eseq_tree));
+	AST* n12 = n1->insert(AST_node(dataType::eseq_tree));
+	AST* n19 = n1->insert(AST_node(dataType::return_inst));
 
-	AST n17 = n16.insert(AST_node(AST_type::name, new std::string("a")));
-	AST n18 = n16.insert(AST_node(AST_type::name, new std::string("b")));
+	AST* n3 = n2->insert(AST_node(dataType::int_type));
+	AST* n4 = n2->insert(AST_node(dataType::name, datum("a")));
+	AST* n5 = n2->insert(AST_node(dataType::name, datum("b")));
+	AST* n7 = n6->insert(AST_node(dataType::call_inst));
+	AST* n13 = n12->insert(AST_node(dataType::call_inst));
+	AST* n20 = n19->insert(AST_node(dataType::constant, datum(0)));
 
-	return n1;
+	AST* n8 = n7->insert(AST_node(dataType::name, datum("scanf")));
+	AST* n9 = n7->insert(AST_node(dataType::string, datum("%d%d")));
+	AST* n10 = n7->insert(AST_node(dataType::name, datum("a")));
+	AST* n11 = n7->insert(AST_node(dataType::name, datum("b")));
+	AST* n14 = n13->insert(AST_node(dataType::name, datum("printf")));
+	AST* n15 = n13->insert(AST_node(dataType::string, datum("%d")));
+	AST* n16 = n13->insert(AST_node(dataType::plus));
+
+	AST* n17 = n16->insert(AST_node(dataType::name, datum("a")));
+	AST* n18 = n16->insert(AST_node(dataType::name, datum("b")));
+
+	return nr;
 }

@@ -139,19 +139,27 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ast2ir.cpp" />
+    <ClCompile Include="AST.cpp" />
+    <ClCompile Include="IR.cpp" />
     <ClCompile Include="data\example.c" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="test.cpp" />
+    <ClCompile Include="base.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AST.h" />
     <ClInclude Include="IR.h" />
     <ClInclude Include="test.h" />
-    <ClInclude Include="tree.h" />
+    <ClInclude Include="base.h" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="data\clang.txt" />
     <Text Include="data\example_tokens.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="data\example.exe" />
+    <None Include="data\example.ll" />
+    <None Include="data\ex_linux.ll" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

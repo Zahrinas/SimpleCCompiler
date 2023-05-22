@@ -1,28 +1,15 @@
 #pragma once
 
-#include "tree.h"
-#include "test.h"
+#include "base.h"
 
-enum class AST_type {
-	seq_tree, eseq_tree,
-	decl_inst, return_inst,
-	call_inst,
-	int_type,
-	name, string, constant,
-	plus, minus, multiply, divide,
-
-
-	func_decl, label_decl,
-	void_type, float_type,
-	if_inst, for_inst, while_inst,
-	goto_inst
-};
 
 struct AST_node {
-	AST_type type;
-	void* ptr;
+	dataType type;
+	datum value;
 
-	AST_node(AST_type t, void* p = nullptr);
+	AST_node(dataType t, datum v = datum());
+	std::string toLLVM_type();
+	std::string toStringExpr();
 };
 
 typedef tree<AST_node> AST;

@@ -7,13 +7,11 @@ using namespace std;
 
 #include "AST.h"
 #include "IR.h"
+#include "test.h"
 
 string fileName;
 signed main(signed, char**, char**) {
-	cin >> fileName;
-
-	AST ast;
-	//AST ast = file2ast(fileName);
-
-	IR ir = ast2ir(ast);
+	AST* ast = getExampleAST();
+	IRdata_LLVM ir = ast2ir(*ast);
+	ir.printIR("data/gen.ll");
 }
