@@ -1,6 +1,6 @@
 %{
     #include <string.h>
-    #include "y.tab.h"
+    #include "yacc.tab.h"
 
     char name[20];
     int val_int = 0;

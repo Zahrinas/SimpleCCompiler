@@ -1,8 +1,6 @@
-#include<stdio.h>
 int main() {
     int a, b;
     double k = 1.02;
-    scanf("%d%d", &a, &b);
     if (a >= b){
         a = !b;
     }
