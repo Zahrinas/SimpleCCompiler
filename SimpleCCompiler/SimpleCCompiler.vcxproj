@@ -141,7 +141,6 @@
   <ItemGroup>
     <ClCompile Include="AST.cpp" />
     <ClCompile Include="IR.cpp" />
-    <ClCompile Include="data\example.c" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="test.cpp" />
     <ClCompile Include="base.cpp" />

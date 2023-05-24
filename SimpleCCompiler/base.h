@@ -18,9 +18,11 @@ enum class dataType {
 	seq_tree, eseq_tree,
 	decl_inst, return_inst,
 	call_inst,
-	void_type, int_type, double_type, pointer_type,
+	void_type, int_type, double_type,
 	name, string, constant,
 	plus, minus, multiply, divide,
+	assign,
+	address, member,
 
 
 	label_decl,
@@ -42,13 +44,6 @@ struct datum {
 	int getDataInt();
 	double getDataDouble();
 	std::string getDataString();
-};
-
-struct variable {
-	std::string name;
-	datum data;
-
-	variable(std::string s, datum d);
 };
 
 template <typename T>

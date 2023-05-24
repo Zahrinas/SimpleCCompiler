@@ -1730,7 +1730,7 @@ yyreduce:
   case 30:
 #line 159 "yacc.y"
                                   {
-    (yyval.ast) = newNode(AST_type::if_inst, "if_inst", 3, (yyvsp[-4].ast), (yyvsp[-2].ast), (yyvsp[0].ast));  // ! 不需要else_inst是吗？
+    (yyval.ast) = newNode(AST_type::if_inst, "if_inst", 3, (yyvsp[-4].ast), (yyvsp[-2].ast), (yyvsp[0].ast));  // ! 不需要else_inst是吗�?
 }
 #line 1736 "yacc.tab.c"
     break;
@@ -1992,7 +1992,7 @@ yyreduce:
   case 63:
 #line 263 "yacc.y"
                     {
-    (yyval.ast) = newNode(AST_type::array, "array", 2, (yyvsp[-3].ast), (yyvsp[-1].ast));  // ! 这里访问数组内存要怎么表示？
+    (yyval.ast) = newNode(AST_type::array, "array", 2, (yyvsp[-3].ast), (yyvsp[-1].ast));  // ! 这里访问数组内存要怎么表示�?
 }
 #line 1998 "yacc.tab.c"
     break;
@@ -2290,6 +2290,9 @@ int yywrap() {
 }
 
 int main(int argc, char **argv) {
+	freopen("in.txt", "r", stdin);
+	freopen("out.txt", "w", stdout);
+	
     if (argc <= 1) {
         yyparse();
         printTreeInfo(root, 0);

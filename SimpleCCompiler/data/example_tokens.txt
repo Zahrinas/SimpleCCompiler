@@ -1,6 +1,48 @@
-int name(main) left_paren right_paren left_brace
-int name(a) comma name(b) semicolon
-name(scanf) left_paren string(%d%d) comma and name(a) comma and name(b) right_paren semicolon
-name(printf) left_paren string(%d) comma name(a) plus name(b) right_paren semicolon
-return const(0) semicolon
-right_brace
+program
+  seq_tree
+    decl_inst
+      int_type
+      func_decl
+        name(main)
+      eseq_tree
+        seq_tree
+          decl_inst
+            int_type
+            seq_tree
+              decl_inst
+                name(a)
+              seq_tree
+                decl_inst
+                  name(b)
+          seq_tree
+            decl_inst
+              double_type
+              seq_tree
+                assign_inst
+                  name(k)
+                  constant(1.020000)
+        seq_tree
+          if_inst
+            greater_equal
+              name(a)
+              name(b)
+            seq_tree
+              eseq_tree
+                seq_tree
+                  seq_tree
+                    assign_inst
+                      name(a)
+                      not_type
+                        name(b)
+            seq_tree
+              eseq_tree
+                seq_tree
+                  seq_tree
+                    assign_inst
+                      name(a)
+                      and_type
+                        name(a)
+                        name(b)
+          seq_tree
+            return_inst
+              constant(0)

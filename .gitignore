@@ -273,3 +273,16 @@ __pycache__/
 
 # Cake - Uncomment if you are using it
 # tools/
+
+*.d
+*.obj
+*.o
+*.tlog
+*.lastbuildstate
+*.idb
+*.pdb
+*~
+*.swp
+*.dev
+*.layout
+*.exe

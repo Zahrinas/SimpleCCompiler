@@ -17,7 +17,7 @@ datum::datum(std::string s) {
 
 datum::datum(dataType dt) {
 	this->type = dt;
-	if (dt == dataType::void_type || dt == dataType::pointer_type) this->ptr = nullptr;
+	if (dt == dataType::void_type) this->ptr = nullptr;
 	else if (dt == dataType::int_type) this->ptr = new int();
 	else if (dt == dataType::double_type) this->ptr = new double();
 	else if (dt == dataType::string) this->ptr = new std::string();
@@ -42,9 +42,4 @@ double datum::getDataDouble() {
 
 std::string datum::getDataString() {
 	return *(std::string*)ptr;
-}
-
-variable::variable(std::string s, datum d) {
-	this->name = s;
-	this->data = d;
 }

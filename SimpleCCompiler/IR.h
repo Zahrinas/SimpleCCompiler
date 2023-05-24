@@ -1,22 +1,40 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <map>
 
 #include "base.h"
-#include "AST.h"
+#include "ast.h"
+
+enum class ExpType {
+	constant, variable, voidtype
+};
+
+struct Expression {
+	std::string type;
+	std::string value;
+
+	Expression(std::string t, std::string v);
+};
 
 struct binding {
-	AST_node v;
+	std::string type;
 	std::string name;
+	std::string ptr;
+	std::string IRname;
 
-	binding(AST_node v, std::string n);
+	binding(std::string type, std::string name, std::string ptr, std::string IRname);
 };
 
 struct IR_funct {
+	int instCnt;
 	dataType type;
 	std::string name;
+	std::map<std::string, std::string> alloc;
 	std::vector<binding> bind;
 	std::vector<std::string> body;
+
+	IR_funct();
 
 	std::string toLLVM_type();
 };
@@ -30,16 +48,16 @@ struct IRdata_LLVM {
 	std::vector<AST_node> globals;
 	std::vector<IR_funct> functs;
 
-	void parseAST(AST ast);
-	void getGlobalsFrom(AST ast);
-	void getFunctsFrom(AST ast);
+	void parseAST(AST* ast);
+	void getGlobalsFrom(AST* ast);
+	void getFunctsFrom(AST* ast);
 
-	IR_funct parseFunct(AST ast);
-	datum parseSequence(IR_funct& fun, AST ast);
+	IR_funct parseFunct(AST* ast);
+	Expression parseSequence(IR_funct& fun, AST* ast);
 
 	std::string getVarType(IR_funct& fun, AST_node v);
 	std::string getVarId(IR_funct& fun, AST_node v);
 	void printIR(std::string filename);
 };
 
-IRdata_LLVM ast2ir(AST ast);
+IRdata_LLVM ast2ir(AST* ast);
