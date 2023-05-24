@@ -1,4 +1,4 @@
-# Project: 项目 2
+# Project: yaccer
 # Makefile created by Dev-C++ 5.15
 
 CPP      = g++.exe -D__DEBUG__
@@ -9,7 +9,7 @@ LINKOBJ  = AST.o lex.yy.o yacc.tab.o
 LIBS     = -L"D:/Program Files (x86)/Dev-Cpp/TDM-GCC-64/lib" -L"D:/Program Files (x86)/Dev-Cpp/TDM-GCC-64/x86_64-w64-mingw32/lib" -static-libgcc -lws2_32 -m64 -g3
 INCS     = -I"D:/Program Files (x86)/Dev-Cpp/TDM-GCC-64/include" -I"D:/Program Files (x86)/Dev-Cpp/TDM-GCC-64/x86_64-w64-mingw32/include" -I"D:/Program Files (x86)/Dev-Cpp/TDM-GCC-64/lib/gcc/x86_64-w64-mingw32/9.2.0/include"
 CXXINCS  = -I"D:/Program Files (x86)/Dev-Cpp/TDM-GCC-64/include" -I"D:/Program Files (x86)/Dev-Cpp/TDM-GCC-64/x86_64-w64-mingw32/include" -I"D:/Program Files (x86)/Dev-Cpp/TDM-GCC-64/lib/gcc/x86_64-w64-mingw32/9.2.0/include" -I"D:/Program Files (x86)/Dev-Cpp/TDM-GCC-64/lib/gcc/x86_64-w64-mingw32/9.2.0/include/c++"
-BIN      = "项目 2.exe"
+BIN      = yaccer.exe
 CXXFLAGS = $(CXXINCS) -m64 -Wall -g3
 CFLAGS   = $(INCS) -m64 -Wall -g3
 RM       = del /q

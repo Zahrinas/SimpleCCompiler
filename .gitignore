@@ -281,8 +281,8 @@ __pycache__/
 *.lastbuildstate
 *.idb
 *.pdb
-*~
 *.swp
 *.dev
 *.layout
 *.exe
+*.win
