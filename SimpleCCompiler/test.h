@@ -2,4 +2,5 @@
 
 #include "ast.h"
 
-AST* getExampleAST();
+AST* getExampleAST1();
+AST* getExampleAST2();

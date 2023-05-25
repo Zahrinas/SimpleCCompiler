@@ -17,3 +17,4 @@ define i32 @main() {
 }
 declare i32 @__isoc99_scanf(i8*, ...)
 declare i32 @printf(i8*, ...)
+declare i8 * @malloc(i64 noundef)

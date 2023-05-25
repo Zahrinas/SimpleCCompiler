@@ -1,9 +1,12 @@
-#include<stdio.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-int main__() {
-    int a, b;
-    scanf_s("%d%d", &a, &b);
-    printf("%d", a + b);
-    scanf_s(" ");
+int main() {
+    int* a;
+    int b, c;
+    b = 5;
+    c = 10;
+    a = malloc(4 * 100000);
+    a[b] = c;
     return 0;
 }

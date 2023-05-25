@@ -58,7 +58,15 @@ Expression IRdata_LLVM::parseSequence(IR_funct& fun, AST* ast) {
 	case dataType::assign: {
 		Expression a = parseSequence(fun, ast->son[0]);
 		Expression b = parseSequence(fun, ast->son[1]);
-		fun.body.push_back("store " + b.type + " " + b.value + ", " + a.type + " " + a.value);
+		if (a.type != b.type) {
+			++fun.instCnt;
+			fun.body.push_back("%" + std::to_string(fun.instCnt) + " = bitcast " + b.type + " " + b.value + " to " + a.type);
+			b.type = a.type, b.value = "%" + std::to_string(fun.instCnt);
+		}
+		fun.body.push_back("store " + b.type + " " + b.value + ", " + a.type + "* " + fun.alloc[a.value]);
+		for (int i = 0; i < fun.bind.size(); ++i) if (fun.bind[i].ptr == fun.alloc[a.value]) {
+			fun.bind[i].IRname = "";
+		}
 		return Expression(a.type, a.value);
 	}
 	case dataType::plus: {
@@ -74,6 +82,14 @@ Expression IRdata_LLVM::parseSequence(IR_funct& fun, AST* ast) {
 			fun.bind[i].IRname = "";
 		}
 		return Expression(a.type + "*", fun.alloc[a.value]);
+	}
+	case dataType::subscript: {
+		Expression a = parseSequence(fun, ast->son[0]);
+		Expression b = parseSequence(fun, ast->son[1]);
+		++fun.instCnt;
+		fun.body.push_back("%" + std::to_string(fun.instCnt) + " = getelementptr inbounds "
+			+ a.type.substr(0, a.type.length() - 1) + ". " + a.type + a.value + ", " + b.type + " " + b.value);
+		return Expression(a.type.substr(0, a.type.length() - 1), "%" + std::to_string(fun.instCnt));
 	}
 	case dataType::constant: {
 		return Expression(ast->data.toLLVM_type(), ast->data.toStringExpr());
@@ -123,6 +139,14 @@ Expression IRdata_LLVM::parseSequence(IR_funct& fun, AST* ast) {
 				+ getVarId(fun, ast->son[1]->data) + ", i64 0, i64 0)" + str;
 			fun.body.push_back(str);
 			return Expression("i32", "%" + std::to_string(fun.instCnt));
+		}
+		else if(ast->son[0]->data.value.getDataString() == "malloc") {
+			Expression a = parseSequence(fun, ast->son[1]);
+			++fun.instCnt;
+			std::string str = "%" + std::to_string(fun.instCnt) + " = call i8* @malloc("
+				+ ast->son[1]->data.toLLVM_type() + " " + ast->son[1]->data.toStringExpr() + ")";
+			fun.body.push_back(str);
+			return Expression("i8*", "%" + std::to_string(fun.instCnt));
 		}
 		else {
 			//to be editted
@@ -238,4 +262,5 @@ void IRdata_LLVM::printIR(std::string filename) {
 
 	fout << "declare i32 @__isoc99_scanf(i8*, ...)" << std::endl;
 	fout << "declare i32 @printf(i8*, ...)" << std::endl;
+	fout << "declare i8 * @malloc(i64 noundef)" << std::endl;
 }

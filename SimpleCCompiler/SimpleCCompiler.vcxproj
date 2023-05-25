@@ -153,10 +153,8 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="data\clang.txt" />
-    <Text Include="data\example_tokens.txt" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="data\example.exe" />
     <None Include="data\example.ll" />
     <None Include="data\ex_linux.ll" />
   </ItemGroup>
