@@ -20,8 +20,8 @@ enum class dataType {
 	decl_inst,
 	return_inst, call_inst,
 
-	void_type, int_type, double_type,
-	int_pointer, double_pointer,
+	void_type, int_type, double_type, char_type,
+	int_pointer, double_pointer, char_pointer,
 
 	name, string, constant,
 

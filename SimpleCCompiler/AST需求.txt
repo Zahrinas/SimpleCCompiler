@@ -26,6 +26,7 @@ name, string, constant...
 有数据的标志，没有子节点
 
 plus, minus, multiply, divide....
+less, greater, less_equal....
  -s1: eseq_tree（表达式）
  -s2: eseq_tree（表达式）
 
@@ -36,9 +37,19 @@ plus, minus, multiply, divide....
 取地址运算符address（&）
   -s1: 变量名，如name(a)
 
+下标运算符subscript
+  -s1: 指针变量名，如name(arr)
+  -s2: eseq_tree，运算结果为下标
+
 成员运算符member（*）
   -s1: 指针变量名，如name(ptr)
 
 if语句if_inst
   -s1: eseq_tree（表达式）
   -s2: seq_tree（语句流）
+
+标签声明label_decl
+没有子节点，datum是标签名（字符串）
+
+goto语句goto_inst
+没有子节点，datum是标签名（字符串）

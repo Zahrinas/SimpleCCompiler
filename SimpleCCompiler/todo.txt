@@ -1,3 +1,3 @@
-pointer type
-return a variable
+if branch
+goto and label
 call a defined function
