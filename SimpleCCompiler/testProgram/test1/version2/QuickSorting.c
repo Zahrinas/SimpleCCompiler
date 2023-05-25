@@ -3,29 +3,34 @@
 
 
 void Quicksort(int* a, int low, int high) {
-
     if (low >= high) {
         return;
     }
 
-    int key = a[low];
+    int key, i, j;
+	key = a[low];
+	i = low;
+	j = high;
 
-    int i = low;
-    int j = high;
-
-    while (i < j) {
-
-        while (i < j && a[j] >= key) {
-            j--;
+	label1:
+    if (i < j) {
+    	
+		label2:
+        if (i < j && a[j] >= key) {
+            j = j - 1;
+            goto label2;
         }
 
         a[i] = a[j];
-
-        while (i < j && a[i] <= key) {
-            i++;
+        
+		label3:
+        if (i < j && a[i] <= key) {
+            i = i + 1;
+            goto label3;
         }
 
         a[j] = a[i];
+        goto label1;
     }
 
     a[i] = key;
@@ -41,13 +46,13 @@ int main() {
 
     scanf("%d", &N);
 
-    int* a = malloc(sizeof(int)*100000);
+    int* a = malloc(400000);
 	
 	i = 0;
 	label1:
 		if(i < N){
 			scanf("%d", &a[i]);
-			i++;
+			i = i + 1;
 			goto label1;
 		}
 
@@ -57,7 +62,7 @@ int main() {
 	label2:
 		if(i < N){
         	printf("%d\n", a[i]);
-			i++;
+			i = i + 1;
 			goto label2;
 		}
 	

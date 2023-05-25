@@ -27,7 +27,15 @@ std::string AST_node::toLLVM_type() {
 std::string AST_node::toStringExpr() {
 	if (type == dataType::int_type) return std::to_string(*(int*)value.ptr);
 	else if (type == dataType::double_type) return std::to_string(*(double*)value.ptr);
-	else if (type == dataType::string) return "\"" + *(std::string*)value.ptr + "\\00\"";
+	else if (type == dataType::string) {
+		std::string s = *(std::string*)value.ptr;
+		std::string str = "";
+		for (int i = 0; i < s.length(); ++i) {
+			if (s[i] == '\n') str += "\\0A";
+			else str += s[i];
+		}
+		return "\"" + str + "\\00\"";
+	}
 	else if (type == dataType::constant) {
 		if (value.type == dataType::int_type) return std::to_string(*(int*)value.ptr);
 		else if (value.type == dataType::double_type) return std::to_string(*(double*)value.ptr);

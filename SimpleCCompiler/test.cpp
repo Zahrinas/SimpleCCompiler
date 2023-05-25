@@ -190,3 +190,40 @@ AST* getExampleAST4() {
 	AST* n23 = n22->insert(AST_node(dataType::constant, datum(0)));
 	return n0;
 }
+
+//func call
+AST* getExampleAST5() {
+	AST* n0 = new AST(AST_node(dataType::program));
+
+	AST* n1 = n0->insert(AST_node(dataType::func_decl));
+	AST* n2 = n1->insert(AST_node(dataType::int_type));
+	AST* n3 = n1->insert(AST_node(dataType::name, datum("func")));
+	AST* n4 = n1->insert(AST_node(dataType::seq_tree));
+	AST* n5 = n1->insert(AST_node(dataType::decl_inst));
+	AST* n6 = n5->insert(AST_node(dataType::int_type));
+	AST* n7 = n5->insert(AST_node(dataType::name, datum("a")));
+
+	AST* n8 = n4->insert(AST_node(dataType::call_inst));
+	AST* n9 = n8->insert(AST_node(dataType::name, datum("printf")));
+	AST* n10 = n8->insert(AST_node(dataType::string, datum("%d\n")));
+	AST* n11 = n8->insert(AST_node(dataType::name, datum("a")));
+
+	AST* n12 = n4->insert(AST_node(dataType::return_inst));
+	AST* n13 = n12->insert(AST_node(dataType::constant, datum(100)));
+
+	AST* n14 = n0->insert(AST_node(dataType::func_decl));
+	AST* n15 = n14->insert(AST_node(dataType::int_type));
+	AST* n16 = n14->insert(AST_node(dataType::name, datum("main")));
+	AST* n17 = n14->insert(AST_node(dataType::seq_tree));
+
+	AST* n18 = n17->insert(AST_node(dataType::call_inst));
+	AST* n19 = n18->insert(AST_node(dataType::name, datum("printf")));
+	AST* n20 = n18->insert(AST_node(dataType::string, datum("%d\n")));
+	AST* n21 = n18->insert(AST_node(dataType::call_inst));
+	AST* n22 = n21->insert(AST_node(dataType::name, datum("func")));
+	AST* n23 = n21->insert(AST_node(dataType::constant, datum(50)));
+
+	AST* n24 = n17->insert(AST_node(dataType::return_inst));
+	AST* n25 = n24->insert(AST_node(dataType::constant, datum(0)));
+	return n0;
+}

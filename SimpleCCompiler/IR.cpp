@@ -10,7 +10,7 @@ binding::binding(std::string type, std::string name, std::string ptr, std::strin
 	: type(type), name(name), ptr(ptr), IRname(IRname) {
 }
 
-IR_funct::IR_funct() : instCnt(0), type("void"), name("") {
+IR_funct::IR_funct() : instCnt(-1), type("void"), name("") {
 }
 
 IR_funct IRdata_LLVM::parseFunct(AST* ast) {
@@ -18,7 +18,21 @@ IR_funct IRdata_LLVM::parseFunct(AST* ast) {
 	ret.type = ast->son[0]->data.toLLVM_type();
 	ret.name = ast->son[1]->data.value.getDataString();
 
-	for (int i = 3; i < ast->son.size(); ++i) ret.args.push_back(ast->son[i]->data.toLLVM_type());
+	for (int i = 3; i < ast->son.size(); ++i) {
+		++ret.instCnt;
+		ret.args.push_back(ast->son[i]->son[0]->data.toLLVM_type() + " %" + std::to_string(ret.instCnt));
+	}
+
+	++ret.instCnt;
+
+	for (int i = 3; i < ast->son.size(); ++i) {
+		++ret.instCnt;
+		ret.body.push_back("%" + std::to_string(ret.instCnt) + " = alloca " + ast->son[i]->son[0]->data.toLLVM_type());
+		ret.body.push_back("store " + ast->son[i]->son[0]->data.toLLVM_type() + " %" + std::to_string(i - 3)
+			+ ", " + ast->son[i]->son[0]->data.toLLVM_type() + "* %" + std::to_string(ret.instCnt));
+		ret.bind.push_back(binding(ast->son[i]->son[0]->data.toLLVM_type(), ast->son[i]->son[1]->data.value.getDataString(),
+			"%" + std::to_string(ret.instCnt), ""));
+	}
 
 	parseSequence(ret, ast->son[2]);
 
@@ -176,17 +190,27 @@ Expression IRdata_LLVM::parseSequence(IR_funct& fun, AST* ast) {
 			return Expression("i8*", "%" + std::to_string(fun.instCnt));
 		}
 		else {
-			std::string str = "";
+			std::string str = "", strp = "";
 			for (int i = 1; i < ast->son.size(); ++i) {
 				Expression a = parseSequence(fun, ast->son[i]);
-				str += ", " + a.type + " " + a.value;
+				if (i != 1) strp += ", ";
+				strp += a.type + " " + a.value;
 			}
 			++fun.instCnt;
-			str = "%" + std::to_string(fun.instCnt)
-				+ " = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ("
-				+ ast->son[1]->data.toLLVM_type() + ", " + ast->son[1]->data.toLLVM_type() + "* "
-				+ getVarId(fun, ast->son[1]->data) + ", i64 0, i64 0)" + str + ")";
-			//to be editted
+			std::string type;
+			std::vector<std::string> args;
+			for (int i = 0; i < functs.size(); ++i) if(functs[i].name == ast->son[0]->data.value.getDataString()){
+				type = functs[i].type;
+				args = functs[i].args;
+			}
+			str = "%" + std::to_string(fun.instCnt) + " = call " + type + " (";
+			for (int i = 0; i < args.size(); ++i) {
+				if (i != 0) str += ", ";
+				str += args[i];
+			}
+			str += ") @" + ast->son[0]->data.value.getDataString() + "(" + strp + ")";
+			fun.body.push_back(str);
+			return Expression(type, "%" + std::to_string(fun.instCnt));
 		}
 	}
 	case dataType::return_inst: {
@@ -293,7 +317,7 @@ void IRdata_LLVM::printIR(std::string filename) {
 		fout << "define " << functs[i].type << " @" << functs[i].name << "(";
 		for (int j = 0; j < functs[i].args.size(); ++j) {
 			if (j) fout << ", ";
-			fout << functs[i].args[j] << std::endl;
+			fout << functs[i].args[j];
 		}
 		fout<< ") {" << std::endl;
 		for (int j = 0; j < functs[i].body.size(); ++j) {

@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+int func(int a){
+	printf("%d\n", a);
+	return 100;
+}
+
 int main() {
-    int* a;
-    int b, c;
-    b = 5;
-    c = 10;
-    a = malloc(4 * 100000);
-    a[b] = c;
+	printf("%d\n", func(50));
     return 0;
 }
