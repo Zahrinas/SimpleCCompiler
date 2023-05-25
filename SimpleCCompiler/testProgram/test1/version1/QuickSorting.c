@@ -41,20 +41,10 @@ int main() {
 
     scanf("%d", &N);
 
-    if (N < 0 || N > 10000) {
-        printf("Invalid input: N should be between 0 and 10000.\n");
-        exit(1);
-    }
-
     int a[100000];
 
     for (int i = 0; i < N; i++) {
         scanf("%d", &a[i]);
-
-        if (a[i] <= -10000 || a[i] >= 10000) {
-            printf("Invalid input: each integer should be between -10000 and 10000.\n");
-            exit(1);
-        }
     }
 
     Quicksort(a, 0, N - 1);
