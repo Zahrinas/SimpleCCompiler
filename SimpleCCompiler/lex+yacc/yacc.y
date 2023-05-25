@@ -1,21 +1,22 @@
 %{
+    #include "AST.h"
     #include <stdio.h>
     #include <stdlib.h>
     #include <iostream>
-    #include <string>
-    #include "../AST.h"
+    #include <string.h>
+    
     int yylex(void);
+    void yyrestart(FILE*);
     void yyerror(char *);
 
-    AST* root;
+    struct node * root;
 %}
 
 %union {
     int intval;
     double doubleval;
     char *strval;
-
-    AST* ast;
+    struct node * ast;
 }
 // Tokens
 %token <intval> INTEGER
@@ -24,7 +25,7 @@
 %token <strval> ID
 %token SEMI COMMA ASSIGNOP
 %token EQ GE LE GT LT NE
-%token PLUS MINUS STAR DIV BAND
+%token PLUS MINUS STAR DIV BAND BXOR BOR MOD
 %token AND OR NOT
 %token INT DOUBLE CHAR
 %token LP RP LB RB LC RC
@@ -59,311 +60,227 @@
 
 %%
 // High-level Definitions
-Program : ExtDefList { $$ = $1; root = $$; };   // program is a list of external definitions
+Program : ExtDefList { 
+    $$ = newNode(AST_type::program, "program", 1, $1);
+    root = $$;
+};   // program is a list of external definitions
 
-ExtDefList : ExtDef ExtDefList { $$ = new AST(); $$->son = $1; $$->brother = $2; }
-    | /* empty */ { $$ = nullptr;};
+ExtDefList : ExtDef ExtDefList { 
+    $$ = newNode(AST_type::seq_tree, "seq_tree", 2, $1, $2);
+}
+    | /* empty */ { $$ = NULL;};
 
-ExtDef : Specifier ExtDecList SEMI { 
-    $$ = new AST(new AST_node(AST_type::decl_inst));
-    $$->son = $1;
-    $$->son->brother = $2;
+ExtDef : Specifier ExtDecList SEMI {
+    $$ = newNode(AST_type::decl_inst, "decl_inst", 2, $1, $2);
 }  // global variable declaration, e.g. int a, b, c;
     | Specifier SEMI {
-    $$ = new AST(new AST_node(AST_type::decl_inst));
-    $$->son = $1;
+    $$ = newNode(AST_type::decl_inst, "decl_inst", 1, $1);
 }    // global variable declaration, e.g. int;
     | Specifier FunDec CompSt {
-    $$ = new AST(new AST_node(AST_type::decl_inst));
-    $$->son = $1;
-    $$->son->brother = $2;
-    $$->son->brother->brother = $3;
+    $$ = newNode(AST_type::decl_inst, "decl_inst", 3, $1, $2, $3);
 };  // function definition, e.g. int main() { ... }
 
 ExtDecList : ExtDec {
-    $$ = new AST(new AST_node(AST_type::seq_tree));
-    $$->son = $1;
+    $$ = newNode(AST_type::seq_tree, "seq_tree", 1, $1);
 }
     | ExtDec COMMA ExtDecList {
-    $$ = new AST(new AST_node(AST_type::seq_tree));
-    $$->son = $1;
-    $$->son->brother = $3;
+    $$ = newNode(AST_type::seq_tree, "seq_tree", 2, $1, $3);
 }; // e.g. a, b, c
 
 ExtDec : VarDec {
-    $$ = new AST(new AST_node(AST_type::decl_inst));
-    $$->son = $1;
+    $$ = newNode(AST_type::decl_inst, "decl_inst", 1, $1);
 }  // variable definition, e.g. a[10][2]
-    | VarDec ASSIGNOP Exp { // ! 要不要加上assign节点?
-    $$ = new AST(new AST_node(AST_type::decl_inst));
-    $$->son = $1;
-    $$->son->brother = $3;
+    | VarDec ASSIGNOP Exp { // ! 要不要加上assign_inst?
+    $$ = newNode(AST_type::assign_inst, "assign_inst", 2, $1, $3);
 };  // variable definition with initialization, e.g. a[10][2] = 1;
 
 // Specifiers
 Specifier : INT {
-    $$ = new AST(new AST_node(AST_type::int_type));
+    $$ = newNode(AST_type::int_type, "int_type", 0);
 }
     | DOUBLE {
-    $$ = new AST(new AST_node(AST_type::double_type));
+    $$ = newNode(AST_type::double_type, "double_type", 0);
 }
-    | CHAR; // ! TODO: char type
+    | CHAR {
+    $$ = newNode(AST_type::char_type, "char_type", 0);
+};
 
 // Declarators
 VarDec : ID {
-    $$ = new AST(new AST_node(AST_type::name, datum($1)));    // ! 应该是这样写的吧
+    $$ = newTerNode(AST_type::name, "name", datum($1));
 }
     | VarDec LB INTEGER RB {
-    $$ = new AST(new AST_node(AST_type::array));    // ! 数组要怎么表示？
-    $$->son = $1;
-    $$->son->brother = new AST(new AST_node(AST_type::constant, datum($3)));
+    $$ = newNode(AST_type::array, "array", 2, $1, newTerNode(AST_type::constant, "constant", datum($3)));
 }; // e.g. a[10]
 
 FunDec : ID LP VarList RP {
-    $$ = new AST(new AST_node(AST_type::func_decl));
-    $$->son = new AST(new AST_node(AST_type::name, datum($1)));
-    $$->son->brother = $3;
+    $$ = newNode(AST_type::func_decl, "func_decl", 2, newTerNode(AST_type::name, "name", datum($1)), $3);
 }   // e.g. foo(int x, float y[10])
     | ID LP RP {
-    $$ = new AST(new AST_node(AST_type::func_decl));
-    $$->son = new AST(new AST_node(AST_type::name, datum($1)));
+    $$ = newNode(AST_type::func_decl, "func_decl", 1, newTerNode(AST_type::name, "name", datum($1)));
 }; // e.g. foo()
 
 VarList : ParamDec COMMA VarList {
-    $$ = new AST(new AST_node(AST_type::seq_tree));
-    $$->son = $1;
-    $$->son->brother = $3;
+    $$ = newNode(AST_type::seq_tree, "seq_tree", 2, $1, $3);
 }
     | ParamDec {
-    $$ = new AST(new AST_node(AST_type::seq_tree));
-    $$->son = $1;
+    $$ = newNode(AST_type::seq_tree, "seq_tree", 1, $1);
 };
 
 ParamDec : Specifier VarDec {
-    $$ = new AST(new AST_node(AST_type::decl_inst));
-    $$->son = $1;
-    $$->son->brother = $2;
+    $$ = newNode(AST_type::decl_inst, "decl_inst", 2, $1, $2);
 };  // e.g. int a[10]
 
 // Statements
 CompSt : LC DefList StmtList RC {
-    $$ = new AST(new AST_node(AST_type::eseq_tree));
-    $$->son = $2;
-    $$->son->brother = $3;
+    $$ = newNode(AST_type::eseq_tree, "eseq_tree", 2, $2, $3);
 };    // compound statement, e.g. { int a; int b; ... }
 
 StmtList : Stmt StmtList {
-    $$ = new AST(new AST_node(AST_type::seq_tree));
-    $$->son = $1;
-    $$->son->brother = $2;
+    $$ = newNode(AST_type::seq_tree, "seq_tree", 2, $1, $2);
 }
-    | /* empty */ { $$ = nullptr; };
+    | /* empty */ { $$ = NULL; };
 
 Stmt : Exp SEMI {
-    $$ = new AST(new AST_node(AST_type::seq_tree));
-    $$->son = $1;
+    $$ = newNode(AST_type::seq_tree, "seq_tree", 1, $1);
 } // expression
     | CompSt {
-    $$ = $1;
+    $$ = newNode(AST_type::seq_tree, "seq_tree", 1, $1);
 }    // compound statement inside a compound statement
     | RETURN Exp SEMI {
-    $$ = new AST(new AST_node(AST_type::return_inst));
-    $$->son = $2;
+    $$ = newNode(AST_type::return_inst, "return_inst", 1, $2);
 }   // return statement
     | RETURN SEMI {
-    $$ = new AST(new AST_node(AST_type::return_inst));
+    $$ = newNode(AST_type::return_inst, "return_inst", 0);
 } // return;
     | IF LP Exp RP Stmt %prec LOWER_THAN_ELSE {
-    $$ = new AST(new AST_node(AST_type::if_inst));
-    $$->son = $3;
-    $$->son->brother = $5;
+    $$ = newNode(AST_type::if_inst, "if_inst", 2, $3, $5);
 }   // if statement
     | IF LP Exp RP Stmt ELSE Stmt {
-    $$ = new AST(new AST_node(AST_type::if_inst));
-    $$->son = $3;
-    $$->son->brother = $5;
-    $$->son->brother->brother = $7; // ! 不需要else_inst是吗？
+    $$ = newNode(AST_type::if_inst, "if_inst", 3, $3, $5, $7);  // ! 不需要else_inst是吗？
 }   // if-else statement
     | WHILE LP Exp RP Stmt {
-    $$ = new AST(new AST_node(AST_type::while_inst));
-    $$->son = $3;
-    $$->son->brother = $5;
+    $$ = newNode(AST_type::while_inst, "while_inst", 2, $3, $5);
 }; // while statement
 
 // Local Definitions
 DefList : Def DefList {
-    $$ = new AST(new AST_node(AST_type::seq_tree));
-    $$->son = $1;
-    $$->son->brother = $2;
+    $$ = newNode(AST_type::seq_tree, "seq_tree", 2, $1, $2);
 }   // list of local definitions, e.g. int a; double b, c;
-    | /* empty */ { $$ = nullptr; };
+    | /* empty */ { $$ = NULL; };
 
 Def : Specifier DecList SEMI {
-    $$ = new AST(new AST_node(AST_type::decl_inst));
-    $$->son = $1;
-    $$->son->brother = $2;
+    $$ = newNode(AST_type::decl_inst, "decl_inst", 2, $1, $2);
 };   // local definition, e.g. int a, b, c;
 
 DecList : Dec {
-    $$ = new AST(new AST_node(AST_type::seq_tree));
-    $$->son = $1;
+    $$ = newNode(AST_type::seq_tree, "seq_tree", 1, $1);
 }
     | Dec COMMA DecList {
-    $$ = new AST(new AST_node(AST_type::seq_tree));
-    $$->son = $1;
-    $$->son->brother = $3;
+    $$ = newNode(AST_type::seq_tree, "seq_tree", 2, $1, $3);
 };
 
 Dec : VarDec {
-    $$ = new AST(new AST_node(AST_type::decl_inst));
-    $$->son = $1;
+    $$ = newNode(AST_type::decl_inst, "decl_inst", 1, $1);
 }
     | VarDec ASSIGNOP Exp { // ! 要不要加上assign节点?
-    $$ = new AST(new AST_node(AST_type::decl_inst));
-    $$->son = $1;
-    $$->son->brother = $3;
+    $$ = newNode(AST_type::assign_inst, "assign_inst", 2, $1, $3);
 };
 
 // Expressions
 Exp : Exp ASSIGNOP Exp {
-    $$ = new AST(new AST_node(AST_type::assign));
-    $$->son = $1;
-    $$->son->brother = $3;
+    $$ = newNode(AST_type::assign_inst, "assign_inst", 2, $1, $3);
 }
     | Exp AND Exp {
-    $$ = new AST(new AST_node(AST_type::and));
-    $$->son = $1;
-    $$->son->brother = $3;
+    $$ = newNode(AST_type::and_type, "and_type", 2, $1, $3);
 }
     | Exp OR Exp {
-    $$ = new AST(new AST_node(AST_type::or));
-    $$->son = $1;
-    $$->son->brother = $3;
+    $$ = newNode(AST_type::or_type, "or_type", 2, $1, $3);
 }
     | Exp EQ Exp {
-    $$ = new AST(new AST_node(AST_type::equal));
-    $$->son = $1;
-    $$->son->brother = $3;
+    $$ = newNode(AST_type::equal, "equal", 2, $1, $3);
 }
     | Exp GE Exp {
-    $$ = new AST(new AST_node(AST_type::greater_equal));
-    $$->son = $1;
-    $$->son->brother = $3;
+    $$ = newNode(AST_type::greater_equal, "greater_equal", 2, $1, $3);
 }
     | Exp LE Exp {
-    $$ = new AST(new AST_node(AST_type::less_equal));
-    $$->son = $1;
-    $$->son->brother = $3;
+    $$ = newNode(AST_type::less_equal, "less_equal", 2, $1, $3);
 }
     | Exp GT Exp {
-    $$ = new AST(new AST_node(AST_type::greater));
-    $$->son = $1;
-    $$->son->brother = $3;
+    $$ = newNode(AST_type::greater, "greater", 2, $1, $3);
 }
     | Exp LT Exp {
-    $$ = new AST(new AST_node(AST_type::less));
-    $$->son = $1;
-    $$->son->brother = $3;
+    $$ = newNode(AST_type::less, "less", 2, $1, $3);
 }
     | Exp NE Exp {
-    $$ = new AST(new AST_node(AST_type::not_equal));
-    $$->son = $1;
-    $$->son->brother = $3;
+    $$ = newNode(AST_type::not_equal, "not_equal", 2, $1, $3);
 }
     | Exp PLUS Exp {
-    $$ = new AST(new AST_node(AST_type::plus));
-    $$->son = $1;
-    $$->son->brother = $3;
+    $$ = newNode(AST_type::plus, "plus", 2, $1, $3);
 }
     | Exp MINUS Exp {
-    $$ = new AST(new AST_node(AST_type::minus));
-    $$->son = $1;
-    $$->son->brother = $3;
+    $$ = newNode(AST_type::minus, "minus", 2, $1, $3);
 }
     | Exp STAR Exp {
-    $$ = new AST(new AST_node(AST_type::multiply));
-    $$->son = $1;
-    $$->son->brother = $3;
+    $$ = newNode(AST_type::multiply, "multiply", 2, $1, $3);
 }
     | Exp DIV Exp {
-    $$ = new AST(new AST_node(AST_type::divide));
-    $$->son = $1;
-    $$->son->brother = $3;
+    $$ = newNode(AST_type::divide, "divide", 2, $1, $3);
 }
     | Exp MOD Exp {
-    $$ = new AST(new AST_node(AST_type::mod));
-    $$->son = $1;
-    $$->son->brother = $3;
+    $$ = newNode(AST_type::mod, "mod", 2, $1, $3);
 }
     | Exp BAND Exp {
-    $$ = new AST(new AST_node(AST_type::band));
-    $$->son = $1;
-    $$->son->brother = $3;
+    $$ = newNode(AST_type::band, "band", 2, $1, $3);
 }
     | Exp BOR Exp {
-    $$ = new AST(new AST_node(AST_type::bor));
-    $$->son = $1;
-    $$->son->brother = $3;
+    $$ = newNode(AST_type::bor, "bor", 2, $1, $3);
 }
     | Exp BXOR Exp {
-    $$ = new AST(new AST_node(AST_type::bxor));
-    $$->son = $1;
-    $$->son->brother = $3;
+    $$ = newNode(AST_type::bxor, "bxor", 2, $1, $3);
 }
     | LP Exp RP {
-    $$ = $2;
+    $$ = newNode(AST_type::seq_tree, "seq_tree", 1, $2);
 }
     | MINUS Exp %prec UMINUS {
-    $$ = new AST(new AST_node(AST_type::minus));
-    $$->son = $2;
+    $$ = newNode(AST_type::uminus, "uminus", 1, $2);
 }
     | NOT Exp {
-    $$ = new AST(new AST_node(AST_type::not));
-    $$->son = $2;
+    $$ = newNode(AST_type::not_type, "not_type", 1, $2);
 }
     | BAND Exp %prec UBAND {
-    $$ = new AST(new AST_node(AST_type::band));
-    $$->son = $2;
+    $$ = newNode(AST_type::uband, "uband", 1, $2);
 }
     | STAR Exp %prec USTAR {
-    $$ = new AST(new AST_node(AST_type::multiply));
-    $$->son = $2;
+    $$ = newNode(AST_type::ustar, "ustar", 1, $2);
 }
     | ID LP Args RP {
-    $$ = new AST(new AST_node(AST_type::call_inst));
-    $$->son = new AST(new AST_node(AST_type::name, datum($1)));
-    $$->son->brother = $3;
+    $$ = newNode(AST_type::call_inst, "call_inst", 2, newTerNode(AST_type::name, "name", datum($1)), $3);
 }
     | ID LP RP {
-    $$ = new AST(new AST_node(AST_type::call_inst));
-    $$->son = new AST(new AST_node(AST_type::name, datum($1)));
+    $$ = newNode(AST_type::call_inst, "call_inst", 1, newTerNode(AST_type::name, "name", datum($1)));
 }
     | Exp LB Exp RB {
-    $$ = new AST(new AST_node(AST_type::array)); // ! 这里访问数组内存要用什么节点？
-    $$->son = $1;
-    $$->son->brother = $3;
+    $$ = newNode(AST_type::array, "array", 2, $1, $3);  // ! 这里访问数组内存要怎么表示？
 }
     | ID {
-    $$ = new AST(new AST_node(AST_type::name, datum($1)));
+    $$ = newTerNode(AST_type::name, "name", datum($1));
 }
     | INTEGER {
-    $$ = new AST(new AST_node(AST_type::constant, datum($1)));
+    $$ = newTerNode(AST_type::constant, "constant", datum($1));
 }
     | REAL {
-    $$ = new AST(new AST_node(AST_type::constant, datum($1)));
+    $$ = newTerNode(AST_type::constant, "constant", datum($1));
 }
     | STRING {
-    $$ = new AST(new AST_node(AST_type::string, datum($1)));
+    $$ = newTerNode(AST_type::string, "string", datum($1));
 };
 
 Args : Exp COMMA Args {
-    $$ = new AST(new AST_node(AST_type::seq_tree));
-    $$->son = $1;
-    $$->son->brother = $3;
+    $$ = newNode(AST_type::seq_tree, "seq_tree", 2, $1, $3);
 }
     | Exp {
-    $$ = new AST(new AST_node(AST_type::seq_tree));
-    $$->son = $1;
+    $$ = newNode(AST_type::seq_tree, "seq_tree", 1, $1);
 };
 %%
 
@@ -374,7 +291,23 @@ void yyerror(char *str) {
 int yywrap() {
     return 1;
 }
- 
-int main() {
+
+int main(int argc, char **argv) {
+    if (argc <= 1) {
+        yyparse();
+        printTreeInfo(root, 0);
+        return 0;
+    }
+
+    FILE *f = fopen(argv[1], "r");
+    if (!f) {
+        perror(argv[1]);
+        return 1;
+    }
+
+    yyrestart(f);
     yyparse();
+    printTreeInfo(root, 0);
+
+    return 0;
 }

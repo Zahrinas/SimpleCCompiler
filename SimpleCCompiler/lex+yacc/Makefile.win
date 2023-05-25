@@ -1,0 +1,34 @@
+# Project: yaccer
+# Makefile created by Dev-C++ 5.15
+
+CPP      = g++.exe -D__DEBUG__
+CC       = gcc.exe -D__DEBUG__
+WINDRES  = windres.exe
+OBJ      = AST.o lex.yy.o yacc.tab.o
+LINKOBJ  = AST.o lex.yy.o yacc.tab.o
+LIBS     = -L"D:/Program Files (x86)/Dev-Cpp/TDM-GCC-64/lib" -L"D:/Program Files (x86)/Dev-Cpp/TDM-GCC-64/x86_64-w64-mingw32/lib" -static-libgcc -lws2_32 -m64 -g3
+INCS     = -I"D:/Program Files (x86)/Dev-Cpp/TDM-GCC-64/include" -I"D:/Program Files (x86)/Dev-Cpp/TDM-GCC-64/x86_64-w64-mingw32/include" -I"D:/Program Files (x86)/Dev-Cpp/TDM-GCC-64/lib/gcc/x86_64-w64-mingw32/9.2.0/include"
+CXXINCS  = -I"D:/Program Files (x86)/Dev-Cpp/TDM-GCC-64/include" -I"D:/Program Files (x86)/Dev-Cpp/TDM-GCC-64/x86_64-w64-mingw32/include" -I"D:/Program Files (x86)/Dev-Cpp/TDM-GCC-64/lib/gcc/x86_64-w64-mingw32/9.2.0/include" -I"D:/Program Files (x86)/Dev-Cpp/TDM-GCC-64/lib/gcc/x86_64-w64-mingw32/9.2.0/include/c++"
+BIN      = yaccer.exe
+CXXFLAGS = $(CXXINCS) -m64 -Wall -g3
+CFLAGS   = $(INCS) -m64 -Wall -g3
+RM       = del /q
+
+.PHONY: all all-before all-after clean clean-custom
+
+all: all-before $(BIN) all-after
+
+clean: clean-custom
+	${RM} $(OBJ) $(BIN)
+
+$(BIN): $(OBJ)
+	$(CPP) $(LINKOBJ) -o $(BIN) $(LIBS)
+
+AST.o: AST.cpp
+	$(CPP) -c AST.cpp -o AST.o $(CXXFLAGS)
+
+lex.yy.o: lex.yy.c
+	$(CPP) -c lex.yy.c -o lex.yy.o $(CXXFLAGS)
+
+yacc.tab.o: yacc.tab.c
+	$(CPP) -c yacc.tab.c -o yacc.tab.o $(CXXFLAGS)

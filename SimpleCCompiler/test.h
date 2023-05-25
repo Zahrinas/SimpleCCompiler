@@ -1,5 +1,8 @@
 #pragma once
 
-#include "AST.h"
+#include "ast.h"
 
-AST* getExampleAST();
+AST* getExampleAST1();
+AST* getExampleAST2();
+AST* getExampleAST3();
+AST* getExampleAST4();

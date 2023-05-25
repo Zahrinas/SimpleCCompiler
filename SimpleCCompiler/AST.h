@@ -2,7 +2,6 @@
 
 #include "base.h"
 
-
 struct AST_node {
 	dataType type;
 	datum value;

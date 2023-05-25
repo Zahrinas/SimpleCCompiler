@@ -16,12 +16,22 @@ enum class dataType {
 	program,
 	func_decl,
 	seq_tree, eseq_tree,
-	decl_inst, return_inst,
-	call_inst,
-	void_type, int_type, double_type, pointer_type,
-	name, string, constant,
-	plus, minus, multiply, divide,
 
+	decl_inst,
+	return_inst, call_inst,
+
+	void_type, int_type, double_type, char_type,
+	int_pointer, double_pointer, char_pointer,
+
+	name, string, constant,
+
+	plus, minus, multiply, divide, mod,
+	and_logical, or_logical, not_logical,
+	equal, not_equal, greater, less, greater_equal, less_equal,
+	and_bit, or_bit, xor_bit,
+
+	assign,
+	address, member, subscript,
 
 	label_decl,
 	if_inst, for_inst, while_inst,
@@ -42,13 +52,6 @@ struct datum {
 	int getDataInt();
 	double getDataDouble();
 	std::string getDataString();
-};
-
-struct variable {
-	std::string name;
-	datum data;
-
-	variable(std::string s, datum d);
 };
 
 template <typename T>
