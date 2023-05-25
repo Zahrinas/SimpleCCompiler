@@ -9,7 +9,7 @@
 
 enum class AST_type {
     program,
-    seq_tree, eseq_tree,
+    seq_tree, eseq_tree, deflist,
     decl_inst, return_inst, assign_inst,
     call_inst,
     int_type,
@@ -65,21 +65,15 @@ static inline struct node *newNode(AST_type type, std::string name, int argc, ..
     curNode->type = type;
     curNode->name = name;
 
-    if (argc == 0) return curNode;
+    if (argc == 0) {
+        curNode->child = NULL;
+        return curNode;
+    }
 
     va_list vaList;
     va_start(vaList, argc);
 
     struct node *tempNode = va_arg(vaList, struct node *);
-
-    // curNode->child = tempNode;
-
-    // for (int i = 1; i < argc; ++i) {
-    //     tempNode->next = va_arg(vaList, struct node *);
-    //     if (tempNode->next != NULL) {
-    //         tempNode = tempNode->next;
-    //     }
-    // }
 
     while (tempNode == nullptr && argc > 1) {
         tempNode = va_arg(vaList, struct node *);
