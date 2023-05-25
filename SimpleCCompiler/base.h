@@ -16,14 +16,22 @@ enum class dataType {
 	program,
 	func_decl,
 	seq_tree, eseq_tree,
-	decl_inst, return_inst,
-	call_inst,
-	void_type, int_type, double_type,
-	name, string, constant,
-	plus, minus, multiply, divide,
-	assign,
-	address, member,
 
+	decl_inst,
+	return_inst, call_inst,
+
+	void_type, int_type, double_type, char_type,
+	int_pointer, double_pointer, char_pointer,
+
+	name, string, constant,
+
+	plus, minus, multiply, divide, mod,
+	and_logical, or_logical, not_logical,
+	equal, not_equal, greater, less, greater_equal, less_equal,
+	and_bit, or_bit, xor_bit,
+
+	assign,
+	address, member, subscript,
 
 	label_decl,
 	if_inst, for_inst, while_inst,

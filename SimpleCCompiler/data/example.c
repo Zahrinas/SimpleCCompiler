@@ -1,9 +1,12 @@
-#include<stdio.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-int main__() {
-    int a, b;
-    scanf_s("%d%d", &a, &b);
-    printf("%d", a + b);
-    scanf_s(" ");
+int func(int a){
+	printf("%d\n", a);
+	return 100;
+}
+
+int main() {
+	printf("%d\n", func(50));
     return 0;
 }

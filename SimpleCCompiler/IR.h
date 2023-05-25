@@ -28,15 +28,15 @@ struct binding {
 
 struct IR_funct {
 	int instCnt;
-	dataType type;
+	std::string type;
 	std::string name;
-	std::map<std::string, std::string> alloc;
+	std::vector<std::string> args;
 	std::vector<binding> bind;
+	std::map<std::string, int> labels;
+	std::map<std::string, std::string> alloc;
 	std::vector<std::string> body;
 
 	IR_funct();
-
-	std::string toLLVM_type();
 };
 
 struct IRdata_LLVM {
