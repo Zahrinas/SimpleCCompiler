@@ -88,7 +88,11 @@ Expression IRdata_LLVM::parseSequence(IR_funct& fun, AST* ast) {
 		Expression b = parseSequence(fun, ast->son[1]);
 		++fun.instCnt;
 		fun.body.push_back("%" + std::to_string(fun.instCnt) + " = getelementptr inbounds "
-			+ a.type.substr(0, a.type.length() - 1) + ". " + a.type + a.value + ", " + b.type + " " + b.value);
+			+ a.type.substr(0, a.type.length() - 1) + ", " + a.type + a.value + ", " + b.type + " " + b.value);
+		++fun.instCnt;
+		fun.body.push_back("%" + std::to_string(fun.instCnt)
+			+ " = load " + a.type.substr(0, a.type.length() - 1) + ", " + a.type + " %" + std::to_string(fun.instCnt - 1));
+		fun.alloc["%" + std::to_string(fun.instCnt)] = "%" + std::to_string(fun.instCnt - 1);
 		return Expression(a.type.substr(0, a.type.length() - 1), "%" + std::to_string(fun.instCnt));
 	}
 	case dataType::constant: {
@@ -143,8 +147,8 @@ Expression IRdata_LLVM::parseSequence(IR_funct& fun, AST* ast) {
 		else if(ast->son[0]->data.value.getDataString() == "malloc") {
 			Expression a = parseSequence(fun, ast->son[1]);
 			++fun.instCnt;
-			std::string str = "%" + std::to_string(fun.instCnt) + " = call i8* @malloc("
-				+ ast->son[1]->data.toLLVM_type() + " " + ast->son[1]->data.toStringExpr() + ")";
+			std::string str = "%" + std::to_string(fun.instCnt) + " = call i8* @malloc(i64 "
+				+ ast->son[1]->data.toStringExpr() + ")";
 			fun.body.push_back(str);
 			return Expression("i8*", "%" + std::to_string(fun.instCnt));
 		}

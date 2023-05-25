@@ -87,7 +87,15 @@ AST* getExampleAST2() {
 	AST* n20 = n18->insert(AST_node(dataType::name, datum("b")));
 	AST* n21 = n17->insert(AST_node(dataType::name, datum("c")));
 
+	AST* nex0 = n4->insert(AST_node(dataType::call_inst));
+	AST* nexx1 = nex0->insert(AST_node(dataType::name, datum("printf")));
+	AST* nex1 = nex0->insert(AST_node(dataType::string, datum("%d %d")));
+	AST* nex3 = nex0->insert(AST_node(dataType::subscript));
+	AST* nex4 = nex3->insert(AST_node(dataType::name, datum("a")));
+	AST* nex5 = nex3->insert(AST_node(dataType::constant, datum(5)));
+	AST* nex6 = nex0->insert(AST_node(dataType::constant, datum(1333)));
+
 	AST* n22 = n4->insert(AST_node(dataType::return_inst));
-	AST* n23 = n19->insert(AST_node(dataType::constant, datum(0)));
+	AST* n23 = n22->insert(AST_node(dataType::constant, datum(0)));
 	return n0;
 }
