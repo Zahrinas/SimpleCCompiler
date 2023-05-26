@@ -1,3 +1,0 @@
-if branch
-goto and label
-call a defined function
