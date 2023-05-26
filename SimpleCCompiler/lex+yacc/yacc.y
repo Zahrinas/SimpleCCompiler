@@ -38,8 +38,9 @@
 %type <ast> Program ExtDefList ExtDef ExtDecList ExtDec // High-level Definitions
 %type <ast> Specifier                                   // Specifiers
 %type <ast> VarDec FunDec VarList ParamDec              // Declarators
-%type <ast> CompSt StmtList Stmt                        // Statements
-%type <ast> DefList Def Dec DecList                     // Local Definitions
+%type <ast> CompSt Stmt                                 // Statements
+%type <ast> Def Dec DecList                             // Local Definitions
+%type <ast> BlockItemList BlockItem
 %type <ast> Exp Args                                    // Expressions
 
 %start Program
@@ -149,19 +150,26 @@ ParamDec : Specifier VarDec {
 };  // e.g. int a[10]
 
 // Statements
-CompSt : LC DefList StmtList RC {
-    if ($2 == NULL) {
-        $$ = newNode(AST_type::seq_tree, "seq_tree", 1, $3);
-    } else {
-        $$ = newNode(AST_type::seq_tree, "seq_tree", 2, newNode(AST_type::deflist, "deflist", 1, $2), $3);
-    }
+CompSt : LC BlockItemList RC {
+    $$ = newNode(AST_type::seq_tree, "seq_tree", 1, $2);
+    // if ($2 == NULL) {
+    //     $$ = newNode(AST_type::seq_tree, "seq_tree", 1, $3);
+    // } else {
+    //     $$ = newNode(AST_type::seq_tree, "seq_tree", 2, newNode(AST_type::deflist, "deflist", 1, $2), $3);
+    // }
 };    // compound statement, e.g. { int a; int b; ... }
 
-StmtList : Stmt StmtList {
+BlockItemList: BlockItem BlockItemList {
     $$ = $1;
     $$->next = $2;
 }
-    | /* empty */ { $$ = NULL; };
+| /* empty */ { $$ = NULL; };
+
+BlockItem: Def {
+    $$ = $1;
+} | Stmt {
+    $$ = $1;
+};
 
 Stmt : Exp SEMI {
     $$ = $1;
@@ -208,12 +216,6 @@ Stmt : Exp SEMI {
 };
 
 // Local Definitions
-DefList : Def DefList {
-    $$ = $1;
-    $$->next = $2;
-}   // list of local definitions, e.g. int a; double b, c;
-    | /* empty */ { $$ = NULL; };
-
 Def : Specifier DecList SEMI {
     $$ = newNode(AST_type::decl_inst, "decl_inst", 2, $1, $2);
 };   // local definition, e.g. int a, b, c;
@@ -407,7 +409,7 @@ int main(int argc, char **argv) {
         perror(argv[1]);
         return 1;
     }
-
+    freopen("out.txt", "w", stdout);
     yyrestart(f);
     yyparse();
     printTreeInfo(root, 0);
