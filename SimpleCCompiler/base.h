@@ -33,7 +33,7 @@ enum class dataType {
 	equal, not_equal, greater, less, greater_equal, less_equal,
 	band, bor, bxor, uminus,
 
-	assign_inst,
+	assign,
 	address, member, subscript,
 
 	label_decl,

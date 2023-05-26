@@ -12,7 +12,18 @@ datum::datum(double d) {
 
 datum::datum(std::string s) {
 	this->type = dataType::string;
-	this->ptr = new std::string(s);
+	if(s[0] == '\"') s = std::string(s.substr(1, s.length() - 2));
+	std::string str = "";
+	bool trtag = 0;
+	for (int i = 0; i < s.length(); ++i) {
+		if(trtag){
+			if(s[i] == 'n') str += '\n';
+			trtag = 0;
+		}
+		else if (s[i] == '\\') trtag = 1;
+		else str += s[i];
+	}
+	this->ptr = new std::string(str);
 }
 
 datum::datum(dataType dt) {

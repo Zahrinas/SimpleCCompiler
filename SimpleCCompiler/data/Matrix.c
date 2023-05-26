@@ -1,6 +1,3 @@
-#include<stdio.h>
-#include <stdlib.h>
-
 int main() {
     int RowA;
     int RowB;
@@ -55,7 +52,7 @@ label3:
     if (ColA != RowB) {
         printf("Incompatible Dimensions\n");
     }
-    else {
+    if(ColA == RowB) {
         RowC = RowA;
         ColC = ColB;
         i = 0;
@@ -67,7 +64,7 @@ label3:
                 DataC[i * ColC + j] = 0;
                 k = 0;
             loop7:
-                if (k < ColA) {
+				if (k < ColA) {
                     DataC[i * ColC + j] = DataC[i * ColC + j] + DataA[i * ColA + k] * DataB[k * ColB + j];
                     k = k + 1;
                     goto loop7;

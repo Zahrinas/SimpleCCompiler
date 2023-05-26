@@ -10,6 +10,7 @@ using namespace std;
 
 string fileName;
 signed main(signed, char**, char**) {
+    freopen("data/Matrix.c", "r", stdin);
 	AST* ast = getAST();
 	IRdata_LLVM ir = ast2ir(ast);
 	ir.printIR("data/gen.ll");
