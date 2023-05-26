@@ -399,7 +399,7 @@ int yywrap() {
 }
 
 AST* getAST() {
-    freopen("data/example.c", "r", stdin);
     yyparse();
+    printTreeInfo(root, 0);
     return root;
 }
