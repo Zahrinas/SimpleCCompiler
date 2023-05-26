@@ -12,9 +12,9 @@ int main() {
     ColB = 0;
     ColC = 0;
 
-    int* DataA = malloc(2500);
-    int* DataB = malloc(2500);
-    int* DataC = malloc(2500);
+    int * DataA = malloc(2500);
+    int * DataB = malloc(2500);
+    int * DataC = malloc(2500);
 
     int i;
 	int j;

@@ -33,7 +33,6 @@ std::string AST_node::toStringExpr() {
 	else if (type == dataType::string) {
 		std::string s = *(std::string*)value.ptr;
 		std::string str = "";
-		bool trtag = 0;
 		for (int i = 0; i < s.length(); ++i) {
 			if(s[i] == '\n') str += "\\0A";
 			else str += s[i];
