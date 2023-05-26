@@ -1,5 +1,6 @@
 %{
     #include "AST.h"
+    #include "base.h"
     #include <stdio.h>
     #include <stdlib.h>
     #include <iostream>
@@ -7,9 +8,9 @@
     
     int yylex(void);
     void yyrestart(FILE*);
-    void yyerror(char *);
+    void yyerror(const char *);
 
-    struct node * root;
+    AST * root;
 %}
 
 %union {
@@ -18,7 +19,7 @@
     char *strval;
     char *idval;
     char *labelval;
-    struct node * ast;
+    AST * ast;
 }
 // Tokens
 %token <intval> INTEGER
@@ -65,7 +66,7 @@
 %%
 // High-level Definitions
 Program : ExtDefList { 
-    $$ = newNode(AST_type::program, "program", 1, $1);
+    $$ = newNode(dataType::program, "program", 1, $1);
     root = $$;
 };   // program is a list of external definitions
 
@@ -76,14 +77,14 @@ ExtDefList : ExtDef ExtDefList {
     | /* empty */ { $$ = NULL;};
 
 ExtDef : Specifier ExtDecList SEMI {
-    $$ = newNode(AST_type::decl_inst, "decl_inst", 2, $1, $2);
+    $$ = newNode(dataType::decl_inst, "decl_inst", 2, $1, $2);
 }  // global variable declaration, e.g. int a, b, c;
     | Specifier SEMI {
-    $$ = newNode(AST_type::decl_inst, "decl_inst", 1, $1);
+    $$ = newNode(dataType::decl_inst, "decl_inst", 1, $1);
 }    // global variable declaration, e.g. int;
     | Specifier FunDec CompSt {
     $3->next = $2->next;
-    $$ = newNode(AST_type::func_decl, "func_decl", 3, $1, $2, $3);
+    $$ = newNode(dataType::func_decl, "func_decl", 3, $1, $2, $3);
 };  // function definition, e.g. int main() { ... }
 
 ExtDecList : ExtDec {
@@ -98,43 +99,55 @@ ExtDec : VarDec {
     $$ = $1;
 }  // variable definition, e.g. a[10][2]
     | VarDec ASSIGNOP Exp { // 先留着
-    $$ = newNode(AST_type::assign_inst, "assign", 2, $1, $3);
+    $$ = newNode(dataType::assign, "assign", 2, $1, $3);
 };  // variable definition with initialization, e.g. a[10][2] = 1;
 
 // Specifiers
 Specifier : INT {
-    $$ = newNode(AST_type::int_type, "int_type", 0);
+    $$ = newNode(dataType::int_type, "int_type", 0);
+}
+    | INT STAR %prec USTAR {
+    $$ = newNode(AST_type::int_pointer, "int_pointer", 0);
 }
     | DOUBLE {
-    $$ = newNode(AST_type::double_type, "double_type", 0);
+    $$ = newNode(dataType::double_type, "double_type", 0);
+}   
+    | DOUBLE STAR %prec USTAR {
+    $$ = newNode(AST_type::double_pointer, "double_pointer", 0);
 }
     | CHAR {
-    $$ = newNode(AST_type::char_type, "char_type", 0);
+    $$ = newNode(dataType::char_type, "char_type", 0);
+}
+    | CHAR STAR %prec USTAR {
+    $$ = newNode(AST_type::char_pointer, "char_pointer", 0);
 }
     | VOID {
-    $$ = newNode(AST_type::void_type, "void_type", 0);
+    $$ = newNode(dataType::void_type, "void_type", 0);
+}   
+    | VOID STAR %prec USTAR {
+    $$ = newNode(AST_type::void_pointer, "void_pointer", 0);
 };
 
 // Declarators
 VarDec : ID {
-    $$ = newTerNode(AST_type::name, "name", datum($1));
+    $$ = newTerNode(dataType::name, "name", datum($1));
 }
-    | STAR ID %prec USTAR {
-    $$ = newNode(AST_type::ustar, "member", 1, newTerNode(AST_type::name, "name", datum($2)));
-}
+    /* | STAR ID %prec USTAR {
+    $$ = newNode(dataType::member, "member", 1, newTerNode(dataType::name, "name", datum($2)));
+} */
     | BAND ID %prec UBAND {
-    $$ = newNode(AST_type::uband, "address", 1, newTerNode(AST_type::name, "name", datum($2)));
+    $$ = newNode(dataType::address, "address", 1, newTerNode(dataType::name, "name", datum($2)));
 }
     | VarDec LB INTEGER RB {
-    $$ = newNode(AST_type::array, "subscript", 2, $1, newTerNode(AST_type::constant, "constant", datum($3)));
+    $$ = newNode(dataType::subscript, "subscript", 2, $1, newTerNode(dataType::constant, "constant", datum($3)));
 }; // e.g. a[10]
 
 FunDec : ID LP VarList RP {
-    $$ = newTerNode(AST_type::name, "name", datum($1));
+    $$ = newTerNode(dataType::name, "name", datum($1));
     $$->next = $3;
 }   // e.g. foo(int x, float y[10])
     | ID LP RP {
-    $$ = newTerNode(AST_type::name, "name", datum($1));
+    $$ = newTerNode(dataType::name, "name", datum($1));
 }; // e.g. foo()
 
 VarList : ParamDec COMMA VarList {
@@ -146,17 +159,12 @@ VarList : ParamDec COMMA VarList {
 };
 
 ParamDec : Specifier VarDec {
-    $$ = newNode(AST_type::decl_inst, "decl_inst", 2, $1, $2);
+    $$ = newNode(dataType::decl_inst, "decl_inst", 2, $1, $2);
 };  // e.g. int a[10]
 
 // Statements
 CompSt : LC BlockItemList RC {
-    $$ = newNode(AST_type::seq_tree, "seq_tree", 1, $2);
-    // if ($2 == NULL) {
-    //     $$ = newNode(AST_type::seq_tree, "seq_tree", 1, $3);
-    // } else {
-    //     $$ = newNode(AST_type::seq_tree, "seq_tree", 2, newNode(AST_type::deflist, "deflist", 1, $2), $3);
-    // }
+    $$ = newNode(dataType::seq_tree, "seq_tree", 1, $2);
 };    // compound statement, e.g. { int a; int b; ... }
 
 BlockItemList: BlockItem BlockItemList {
@@ -179,45 +187,45 @@ Stmt : Exp SEMI {
 }    // compound statement inside a compound statement
     | RETURN Exp SEMI {
     if ($2->child == NULL) {
-        $$ = newNode(AST_type::return_inst, "return_inst", 1, $2);
+        $$ = newNode(dataType::return_inst, "return_inst", 1, $2);
     } else {
-        $$ = newNode(AST_type::return_inst, "return_inst", 1, newNode(AST_type::eseq_tree, "eseq_tree", 1, $2));
+        $$ = newNode(dataType::return_inst, "return_inst", 1, newNode(dataType::eseq_tree, "eseq_tree", 1, $2));
     }
 }   // return statement
     | RETURN SEMI {
-    $$ = newNode(AST_type::return_inst, "return_inst", 0);
+    $$ = newNode(dataType::return_inst, "return_inst", 0);
 } // return;
     | IF LP Exp RP Stmt %prec LOWER_THAN_ELSE {
     if ($3->child == NULL) {
-        $$ = newNode(AST_type::if_inst, "if_inst", 2, $3, $5);
+        $$ = newNode(dataType::if_inst, "if_inst", 2, $3, $5);
     } else {
-        $$ = newNode(AST_type::if_inst, "if_inst", 2, newNode(AST_type::eseq_tree, "eseq_tree", 1, $3), $5);
+        $$ = newNode(dataType::if_inst, "if_inst", 2, newNode(dataType::eseq_tree, "eseq_tree", 1, $3), $5);
     }
 }   // if statement
     | IF LP Exp RP Stmt ELSE Stmt {
     if ($3->child == NULL) {
-        $$ = newNode(AST_type::if_inst, "if_inst", 3, $3, $5, $7);
+        $$ = newNode(dataType::if_inst, "if_inst", 3, $3, $5, $7);
     } else {
-        $$ = newNode(AST_type::if_inst, "if_inst", 3, newNode(AST_type::eseq_tree, "eseq_tree", 1, $3), $5, $7);
+        $$ = newNode(dataType::if_inst, "if_inst", 3, newNode(dataType::eseq_tree, "eseq_tree", 1, $3), $5, $7);
     }
 }   // if-else statement
     | WHILE LP Exp RP Stmt {
     if ($3->child == NULL) {
-        $$ = newNode(AST_type::while_inst, "while_inst", 2, $3, $5);
+        $$ = newNode(dataType::while_inst, "while_inst", 2, $3, $5);
     } else {
-        $$ = newNode(AST_type::while_inst, "while_inst", 2, newNode(AST_type::eseq_tree, "eseq_tree", 1, $3), $5);
+        $$ = newNode(dataType::while_inst, "while_inst", 2, newNode(dataType::eseq_tree, "eseq_tree", 1, $3), $5);
     }
 }   // while statement
     | GOTO LABEL SEMI {
-    $$ = newTerNode(AST_type::goto_inst, "goto_inst", datum($2));
+    $$ = newTerNode(dataType::goto_inst, "goto_inst", datum($2));
 }   // goto statement
     | LABEL COLON {
-    $$ = newTerNode(AST_type::label_decl, "label_decl", datum($1));
+    $$ = newTerNode(dataType::label_decl, "label_decl", datum($1));
 };
 
 // Local Definitions
 Def : Specifier DecList SEMI {
-    $$ = newNode(AST_type::decl_inst, "decl_inst", 2, $1, $2);
+    $$ = newNode(dataType::decl_inst, "decl_inst", 2, $1, $2);
 };   // local definition, e.g. int a, b, c;
 
 DecList : Dec {
@@ -233,151 +241,151 @@ Dec : VarDec {
 }
     | VarDec ASSIGNOP Exp {
     if ($3->child == NULL) {
-        $$ = newNode(AST_type::assign_inst, "assign", 2, $1, $3);
+        $$ = newNode(dataType::assign, "assign", 2, $1, $3);
     } else {
-        $$ = newNode(AST_type::assign_inst, "assign", 2, $1, newNode(AST_type::eseq_tree, "eseq_tree", 1, $3));
+        $$ = newNode(dataType::assign, "assign", 2, $1, newNode(dataType::eseq_tree, "eseq_tree", 1, $3));
     }
 };
 
 // Expressions
 Exp : Exp ASSIGNOP Exp {
-    struct node * temp1 = $1->child == NULL ? $1 : newNode(AST_type::eseq_tree, "eseq_tree", 1, $1);
-    struct node * temp2 = $3->child == NULL ? $3 : newNode(AST_type::eseq_tree, "eseq_tree", 1, $3);
-    $$ = newNode(AST_type::assign_inst, "assign", 2, temp1, temp2);
+    AST * temp1 = $1->child == NULL ? $1 : newNode(dataType::eseq_tree, "eseq_tree", 1, $1);
+    AST * temp2 = $3->child == NULL ? $3 : newNode(dataType::eseq_tree, "eseq_tree", 1, $3);
+    $$ = newNode(dataType::assign, "assign", 2, temp1, temp2);
 }
     | Exp AND Exp {
-    struct node * temp1 = $1->child == NULL ? $1 : newNode(AST_type::eseq_tree, "eseq_tree", 1, $1);
-    struct node * temp2 = $3->child == NULL ? $3 : newNode(AST_type::eseq_tree, "eseq_tree", 1, $3);
-    $$ = newNode(AST_type::and_type, "and_type", 2, temp1, temp2);
+    AST * temp1 = $1->child == NULL ? $1 : newNode(dataType::eseq_tree, "eseq_tree", 1, $1);
+    AST * temp2 = $3->child == NULL ? $3 : newNode(dataType::eseq_tree, "eseq_tree", 1, $3);
+    $$ = newNode(dataType::and_type, "and_type", 2, temp1, temp2);
 }
     | Exp OR Exp {
-    struct node * temp1 = $1->child == NULL ? $1 : newNode(AST_type::eseq_tree, "eseq_tree", 1, $1);
-    struct node * temp2 = $3->child == NULL ? $3 : newNode(AST_type::eseq_tree, "eseq_tree", 1, $3);
-    $$ = newNode(AST_type::or_type, "or_type", 2, temp1, temp2);
+    AST * temp1 = $1->child == NULL ? $1 : newNode(dataType::eseq_tree, "eseq_tree", 1, $1);
+    AST * temp2 = $3->child == NULL ? $3 : newNode(dataType::eseq_tree, "eseq_tree", 1, $3);
+    $$ = newNode(dataType::or_type, "or_type", 2, temp1, temp2);
 }
     | Exp EQ Exp {
-    struct node * temp1 = $1->child == NULL ? $1 : newNode(AST_type::eseq_tree, "eseq_tree", 1, $1);
-    struct node * temp2 = $3->child == NULL ? $3 : newNode(AST_type::eseq_tree, "eseq_tree", 1, $3);
-    $$ = newNode(AST_type::equal, "equal", 2, temp1, temp2);
+    AST * temp1 = $1->child == NULL ? $1 : newNode(dataType::eseq_tree, "eseq_tree", 1, $1);
+    AST * temp2 = $3->child == NULL ? $3 : newNode(dataType::eseq_tree, "eseq_tree", 1, $3);
+    $$ = newNode(dataType::equal, "equal", 2, temp1, temp2);
 }
     | Exp GE Exp {
-    struct node * temp1 = $1->child == NULL ? $1 : newNode(AST_type::eseq_tree, "eseq_tree", 1, $1);
-    struct node * temp2 = $3->child == NULL ? $3 : newNode(AST_type::eseq_tree, "eseq_tree", 1, $3);
-    $$ = newNode(AST_type::greater_equal, "greater_equal", 2, temp1, temp2);
+    AST * temp1 = $1->child == NULL ? $1 : newNode(dataType::eseq_tree, "eseq_tree", 1, $1);
+    AST * temp2 = $3->child == NULL ? $3 : newNode(dataType::eseq_tree, "eseq_tree", 1, $3);
+    $$ = newNode(dataType::greater_equal, "greater_equal", 2, temp1, temp2);
 }
     | Exp LE Exp {
-    struct node * temp1 = $1->child == NULL ? $1 : newNode(AST_type::eseq_tree, "eseq_tree", 1, $1);
-    struct node * temp2 = $3->child == NULL ? $3 : newNode(AST_type::eseq_tree, "eseq_tree", 1, $3);
-    $$ = newNode(AST_type::less_equal, "less_equal", 2, temp1, temp2);
+    AST * temp1 = $1->child == NULL ? $1 : newNode(dataType::eseq_tree, "eseq_tree", 1, $1);
+    AST * temp2 = $3->child == NULL ? $3 : newNode(dataType::eseq_tree, "eseq_tree", 1, $3);
+    $$ = newNode(dataType::less_equal, "less_equal", 2, temp1, temp2);
 }
     | Exp GT Exp {
-    struct node * temp1 = $1->child == NULL ? $1 : newNode(AST_type::eseq_tree, "eseq_tree", 1, $1);
-    struct node * temp2 = $3->child == NULL ? $3 : newNode(AST_type::eseq_tree, "eseq_tree", 1, $3);
-    $$ = newNode(AST_type::greater, "greater", 2, temp1, temp2);
+    AST * temp1 = $1->child == NULL ? $1 : newNode(dataType::eseq_tree, "eseq_tree", 1, $1);
+    AST * temp2 = $3->child == NULL ? $3 : newNode(dataType::eseq_tree, "eseq_tree", 1, $3);
+    $$ = newNode(dataType::greater, "greater", 2, temp1, temp2);
 }
     | Exp LT Exp {
-    struct node * temp1 = $1->child == NULL ? $1 : newNode(AST_type::eseq_tree, "eseq_tree", 1, $1);
-    struct node * temp2 = $3->child == NULL ? $3 : newNode(AST_type::eseq_tree, "eseq_tree", 1, $3);
-    $$ = newNode(AST_type::less, "less", 2, temp1, temp2);
+    AST * temp1 = $1->child == NULL ? $1 : newNode(dataType::eseq_tree, "eseq_tree", 1, $1);
+    AST * temp2 = $3->child == NULL ? $3 : newNode(dataType::eseq_tree, "eseq_tree", 1, $3);
+    $$ = newNode(dataType::less, "less", 2, temp1, temp2);
 }
     | Exp NE Exp {
-    struct node * temp1 = $1->child == NULL ? $1 : newNode(AST_type::eseq_tree, "eseq_tree", 1, $1);
-    struct node * temp2 = $3->child == NULL ? $3 : newNode(AST_type::eseq_tree, "eseq_tree", 1, $3);
-    $$ = newNode(AST_type::not_equal, "not_equal", 2, temp1, temp2);
+    AST * temp1 = $1->child == NULL ? $1 : newNode(dataType::eseq_tree, "eseq_tree", 1, $1);
+    AST * temp2 = $3->child == NULL ? $3 : newNode(dataType::eseq_tree, "eseq_tree", 1, $3);
+    $$ = newNode(dataType::not_equal, "not_equal", 2, temp1, temp2);
 }
     | Exp PLUS Exp {
-    struct node * temp1 = $1->child == NULL ? $1 : newNode(AST_type::eseq_tree, "eseq_tree", 1, $1);
-    struct node * temp2 = $3->child == NULL ? $3 : newNode(AST_type::eseq_tree, "eseq_tree", 1, $3);
-    $$ = newNode(AST_type::plus, "plus", 2, temp1, temp2);
+    AST * temp1 = $1->child == NULL ? $1 : newNode(dataType::eseq_tree, "eseq_tree", 1, $1);
+    AST * temp2 = $3->child == NULL ? $3 : newNode(dataType::eseq_tree, "eseq_tree", 1, $3);
+    $$ = newNode(dataType::plus, "plus", 2, temp1, temp2);
 }
     | Exp MINUS Exp {
-    struct node * temp1 = $1->child == NULL ? $1 : newNode(AST_type::eseq_tree, "eseq_tree", 1, $1);
-    struct node * temp2 = $3->child == NULL ? $3 : newNode(AST_type::eseq_tree, "eseq_tree", 1, $3);
-    $$ = newNode(AST_type::minus, "minus", 2, temp1, temp2);
+    AST * temp1 = $1->child == NULL ? $1 : newNode(dataType::eseq_tree, "eseq_tree", 1, $1);
+    AST * temp2 = $3->child == NULL ? $3 : newNode(dataType::eseq_tree, "eseq_tree", 1, $3);
+    $$ = newNode(dataType::minus, "minus", 2, temp1, temp2);
 }
     | Exp STAR Exp {
-    struct node * temp1 = $1->child == NULL ? $1 : newNode(AST_type::eseq_tree, "eseq_tree", 1, $1);
-    struct node * temp2 = $3->child == NULL ? $3 : newNode(AST_type::eseq_tree, "eseq_tree", 1, $3);
-    $$ = newNode(AST_type::multiply, "multiply", 2, temp1, temp2);
+    AST * temp1 = $1->child == NULL ? $1 : newNode(dataType::eseq_tree, "eseq_tree", 1, $1);
+    AST * temp2 = $3->child == NULL ? $3 : newNode(dataType::eseq_tree, "eseq_tree", 1, $3);
+    $$ = newNode(dataType::multiply, "multiply", 2, temp1, temp2);
 }
     | Exp DIV Exp {
-    struct node * temp1 = $1->child == NULL ? $1 : newNode(AST_type::eseq_tree, "eseq_tree", 1, $1);
-    struct node * temp2 = $3->child == NULL ? $3 : newNode(AST_type::eseq_tree, "eseq_tree", 1, $3);
-    $$ = newNode(AST_type::divide, "divide", 2, temp1, temp2);
+    AST * temp1 = $1->child == NULL ? $1 : newNode(dataType::eseq_tree, "eseq_tree", 1, $1);
+    AST * temp2 = $3->child == NULL ? $3 : newNode(dataType::eseq_tree, "eseq_tree", 1, $3);
+    $$ = newNode(dataType::divide, "divide", 2, temp1, temp2);
 }
     | Exp MOD Exp {
-    struct node * temp1 = $1->child == NULL ? $1 : newNode(AST_type::eseq_tree, "eseq_tree", 1, $1);
-    struct node * temp2 = $3->child == NULL ? $3 : newNode(AST_type::eseq_tree, "eseq_tree", 1, $3);
-    $$ = newNode(AST_type::mod, "mod", 2, temp1, temp2);
+    AST * temp1 = $1->child == NULL ? $1 : newNode(dataType::eseq_tree, "eseq_tree", 1, $1);
+    AST * temp2 = $3->child == NULL ? $3 : newNode(dataType::eseq_tree, "eseq_tree", 1, $3);
+    $$ = newNode(dataType::mod, "mod", 2, temp1, temp2);
 }
     | Exp BAND Exp {
-    struct node * temp1 = $1->child == NULL ? $1 : newNode(AST_type::eseq_tree, "eseq_tree", 1, $1);
-    struct node * temp2 = $3->child == NULL ? $3 : newNode(AST_type::eseq_tree, "eseq_tree", 1, $3);
-    $$ = newNode(AST_type::band, "band", 2, temp1, temp2);
+    AST * temp1 = $1->child == NULL ? $1 : newNode(dataType::eseq_tree, "eseq_tree", 1, $1);
+    AST * temp2 = $3->child == NULL ? $3 : newNode(dataType::eseq_tree, "eseq_tree", 1, $3);
+    $$ = newNode(dataType::band, "band", 2, temp1, temp2);
 }
     | Exp BOR Exp {
-    struct node * temp1 = $1->child == NULL ? $1 : newNode(AST_type::eseq_tree, "eseq_tree", 1, $1);
-    struct node * temp2 = $3->child == NULL ? $3 : newNode(AST_type::eseq_tree, "eseq_tree", 1, $3);
-    $$ = newNode(AST_type::bor, "bor", 2, temp1, temp2);
+    AST * temp1 = $1->child == NULL ? $1 : newNode(dataType::eseq_tree, "eseq_tree", 1, $1);
+    AST * temp2 = $3->child == NULL ? $3 : newNode(dataType::eseq_tree, "eseq_tree", 1, $3);
+    $$ = newNode(dataType::bor, "bor", 2, temp1, temp2);
 }
     | Exp BXOR Exp {
-    struct node * temp1 = $1->child == NULL ? $1 : newNode(AST_type::eseq_tree, "eseq_tree", 1, $1);
-    struct node * temp2 = $3->child == NULL ? $3 : newNode(AST_type::eseq_tree, "eseq_tree", 1, $3);
-    $$ = newNode(AST_type::bxor, "bxor", 2, temp1, temp2);
+    AST * temp1 = $1->child == NULL ? $1 : newNode(dataType::eseq_tree, "eseq_tree", 1, $1);
+    AST * temp2 = $3->child == NULL ? $3 : newNode(dataType::eseq_tree, "eseq_tree", 1, $3);
+    $$ = newNode(dataType::bxor, "bxor", 2, temp1, temp2);
 }
     | LP Exp RP {
     $$ = $2;
 }
     | MINUS Exp %prec UMINUS {
     if ($2->child == NULL) {
-        $$ = newNode(AST_type::uminus, "uminus", 1, $2);
+        $$ = newNode(dataType::uminus, "uminus", 1, $2);
     } else {
-        $$ = newNode(AST_type::uminus, "uminus", 1, newNode(AST_type::eseq_tree, "eseq_tree", 1, $2));
+        $$ = newNode(dataType::uminus, "uminus", 1, newNode(dataType::eseq_tree, "eseq_tree", 1, $2));
     }
 }
     | NOT Exp {
     if ($2->child == NULL) {
-        $$ = newNode(AST_type::not_type, "not_type", 1, $2);
+        $$ = newNode(dataType::not_type, "not_type", 1, $2);
     } else {
-        $$ = newNode(AST_type::not_type, "not_type", 1, newNode(AST_type::eseq_tree, "eseq_tree", 1, $2));
+        $$ = newNode(dataType::not_type, "not_type", 1, newNode(dataType::eseq_tree, "eseq_tree", 1, $2));
     }
 }
     | BAND Exp %prec UBAND {
     if ($2->child == NULL) {
-        $$ = newNode(AST_type::uband, "address", 1, $2);
+        $$ = newNode(dataType::address, "address", 1, $2);
     } else {
-        $$ = newNode(AST_type::uband, "address", 1, newNode(AST_type::eseq_tree, "eseq_tree", 1, $2));
+        $$ = newNode(dataType::address, "address", 1, newNode(dataType::eseq_tree, "eseq_tree", 1, $2));
     }
 }
     | STAR Exp %prec USTAR {
     if ($2->child == NULL) {
-        $$ = newNode(AST_type::ustar, "member", 1, $2);
+        $$ = newNode(dataType::member, "member", 1, $2);
     } else {
-        $$ = newNode(AST_type::ustar, "member", 1, newNode(AST_type::eseq_tree, "eseq_tree", 1, $2));
+        $$ = newNode(dataType::member, "member", 1, newNode(dataType::eseq_tree, "eseq_tree", 1, $2));
     }
 }
     | ID LP Args RP {
-    $$ = newNode(AST_type::call_inst, "call_inst", 2, newTerNode(AST_type::name, "name", datum($1)), $3);
+    $$ = newNode(dataType::call_inst, "call_inst", 2, newTerNode(dataType::name, "name", datum($1)), $3);
 }
     | ID LP RP {
-    $$ = newNode(AST_type::call_inst, "call_inst", 1, newTerNode(AST_type::name, "name", datum($1)));
+    $$ = newNode(dataType::call_inst, "call_inst", 1, newTerNode(dataType::name, "name", datum($1)));
 }
     | Exp LB Exp RB {
-    struct node * temp1 = $1->child == NULL ? $1 : newNode(AST_type::eseq_tree, "eseq_tree", 1, $1);
-    struct node * temp2 = $3->child == NULL ? $3 : newNode(AST_type::eseq_tree, "eseq_tree", 1, $3);
-    $$ = newNode(AST_type::array, "subscript", 2, temp1, temp2);
+    AST * temp1 = $1->child == NULL ? $1 : newNode(dataType::eseq_tree, "eseq_tree", 1, $1);
+    AST * temp2 = $3->child == NULL ? $3 : newNode(dataType::eseq_tree, "eseq_tree", 1, $3);
+    $$ = newNode(dataType::subscript, "subscript", 2, temp1, temp2);
 }
     | ID {
-    $$ = newTerNode(AST_type::name, "name", datum($1));
+    $$ = newTerNode(dataType::name, "name", datum($1));
 }
     | INTEGER {
-    $$ = newTerNode(AST_type::constant, "constant", datum($1));
+    $$ = newTerNode(dataType::constant, "constant", datum($1));
 }
     | REAL {
-    $$ = newTerNode(AST_type::constant, "constant", datum($1));
+    $$ = newTerNode(dataType::constant, "constant", datum($1));
 }
     | STRING {
-    $$ = newTerNode(AST_type::string, "string", datum($1));
+    $$ = newTerNode(dataType::string, "string", datum($1));
 };
 
 Args : Exp COMMA Args {
@@ -389,7 +397,7 @@ Args : Exp COMMA Args {
 };
 %%
 
-void yyerror(char *str) {
+void yyerror(const char *str) {
     fprintf(stderr, "error:%s\n", str);
 }
 
@@ -397,22 +405,8 @@ int yywrap() {
     return 1;
 }
 
-int main(int argc, char **argv) {
-    if (argc <= 1) {
-        yyparse();
-        printTreeInfo(root, 0);
-        return 0;
-    }
-
-    FILE *f = fopen(argv[1], "r");
-    if (!f) {
-        perror(argv[1]);
-        return 1;
-    }
-    freopen("out.txt", "w", stdout);
-    yyrestart(f);
+AST* getAST() {
+    freopen("data/example.c", "r", stdin);
     yyparse();
-    printTreeInfo(root, 0);
-
-    return 0;
+    return root;
 }
