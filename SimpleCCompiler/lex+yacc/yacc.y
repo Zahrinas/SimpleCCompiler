@@ -16,18 +16,21 @@
     int intval;
     double doubleval;
     char *strval;
+    char *idval;
+    char *labelval;
     struct node * ast;
 }
 // Tokens
 %token <intval> INTEGER
 %token <doubleval> REAL
 %token <strval> STRING
-%token <strval> ID
-%token SEMI COMMA ASSIGNOP
+%token <idval> ID
+%token <labelval> LABEL
+%token SEMI COMMA ASSIGNOP COLON
 %token EQ GE LE GT LT NE
 %token PLUS MINUS STAR DIV BAND BXOR BOR MOD
 %token AND OR NOT
-%token INT DOUBLE CHAR VOID
+%token INT DOUBLE CHAR VOID GOTO
 %token LP RP LB RB LC RC
 %token RETURN IF ELSE WHILE
 
@@ -122,7 +125,7 @@ VarDec : ID {
     $$ = newNode(AST_type::uband, "address", 1, newTerNode(AST_type::name, "name", datum($2)));
 }
     | VarDec LB INTEGER RB {
-    $$ = newNode(AST_type::array, "array", 2, $1, newTerNode(AST_type::constant, "constant", datum($3)));
+    $$ = newNode(AST_type::array, "subscript", 2, $1, newTerNode(AST_type::constant, "constant", datum($3)));
 }; // e.g. a[10]
 
 FunDec : ID LP VarList RP {
@@ -196,7 +199,13 @@ Stmt : Exp SEMI {
     } else {
         $$ = newNode(AST_type::while_inst, "while_inst", 2, newNode(AST_type::eseq_tree, "eseq_tree", 1, $3), $5);
     }
-}; // while statement
+}   // while statement
+    | GOTO LABEL SEMI {
+    $$ = newTerNode(AST_type::goto_inst, "goto_inst", datum($2));
+}   // goto statement
+    | LABEL COLON {
+    $$ = newTerNode(AST_type::label_decl, "label_decl", datum($1));
+};
 
 // Local Definitions
 DefList : Def DefList {
@@ -354,7 +363,7 @@ Exp : Exp ASSIGNOP Exp {
     | Exp LB Exp RB {
     struct node * temp1 = $1->child == NULL ? $1 : newNode(AST_type::eseq_tree, "eseq_tree", 1, $1);
     struct node * temp2 = $3->child == NULL ? $3 : newNode(AST_type::eseq_tree, "eseq_tree", 1, $3);
-    $$ = newNode(AST_type::array, "array", 2, temp1, temp2);
+    $$ = newNode(AST_type::array, "subscript", 2, temp1, temp2);
 }
     | ID {
     $$ = newTerNode(AST_type::name, "name", datum($1));

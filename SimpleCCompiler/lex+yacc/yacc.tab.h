@@ -53,44 +53,47 @@ extern int yydebug;
     REAL = 259,
     STRING = 260,
     ID = 261,
-    SEMI = 262,
-    COMMA = 263,
-    ASSIGNOP = 264,
-    EQ = 265,
-    GE = 266,
-    LE = 267,
-    GT = 268,
-    LT = 269,
-    NE = 270,
-    PLUS = 271,
-    MINUS = 272,
-    STAR = 273,
-    DIV = 274,
-    BAND = 275,
-    BXOR = 276,
-    BOR = 277,
-    MOD = 278,
-    AND = 279,
-    OR = 280,
-    NOT = 281,
-    INT = 282,
-    DOUBLE = 283,
-    CHAR = 284,
-    VOID = 285,
-    LP = 286,
-    RP = 287,
-    LB = 288,
-    RB = 289,
-    LC = 290,
-    RC = 291,
-    RETURN = 292,
-    IF = 293,
-    ELSE = 294,
-    WHILE = 295,
-    UMINUS = 296,
-    USTAR = 297,
-    UBAND = 298,
-    LOWER_THAN_ELSE = 299
+    LABEL = 262,
+    SEMI = 263,
+    COMMA = 264,
+    ASSIGNOP = 265,
+    COLON = 266,
+    EQ = 267,
+    GE = 268,
+    LE = 269,
+    GT = 270,
+    LT = 271,
+    NE = 272,
+    PLUS = 273,
+    MINUS = 274,
+    STAR = 275,
+    DIV = 276,
+    BAND = 277,
+    BXOR = 278,
+    BOR = 279,
+    MOD = 280,
+    AND = 281,
+    OR = 282,
+    NOT = 283,
+    INT = 284,
+    DOUBLE = 285,
+    CHAR = 286,
+    VOID = 287,
+    GOTO = 288,
+    LP = 289,
+    RP = 290,
+    LB = 291,
+    RB = 292,
+    LC = 293,
+    RC = 294,
+    RETURN = 295,
+    IF = 296,
+    ELSE = 297,
+    WHILE = 298,
+    UMINUS = 299,
+    USTAR = 300,
+    UBAND = 301,
+    LOWER_THAN_ELSE = 302
   };
 #endif
 
@@ -103,9 +106,11 @@ union YYSTYPE
     int intval;
     double doubleval;
     char *strval;
+    char *idval;
+    char *labelval;
     struct node * ast;
 
-#line 109 "yacc.tab.h"
+#line 114 "yacc.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
