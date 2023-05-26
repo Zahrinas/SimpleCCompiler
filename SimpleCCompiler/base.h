@@ -6,12 +6,13 @@
 template <typename T>
 struct tree {
 	T data;
+	tree<T>* next;
 	tree<T>* child;
-	tree<T>*  next;
 	std::string name;
 
 	tree(T data);
 	tree<T>* insert(T data);
+	tree<T>* son(int id);
 };
 
 enum class dataType {
@@ -57,5 +58,14 @@ struct datum {
 };
 
 template <typename T>
-tree<T>::tree(T data) : data(data){
+tree<T>::tree(T data) : data(data), child(nullptr), next(nullptr){
+}
+
+template <typename T>
+tree<T>* tree<T>::son(int id){
+	tree<T>* now = child;
+	for(int i = 0; i < id; ++i){
+		now = now->next;
+	}
+	return now;
 }

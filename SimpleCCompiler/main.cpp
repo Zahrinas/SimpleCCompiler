@@ -7,7 +7,6 @@ using namespace std;
 
 #include "ir.h"
 #include "ast.h"
-#include "test.h"
 
 string fileName;
 signed main(signed, char**, char**) {

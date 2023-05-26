@@ -141,18 +141,13 @@
   <ItemGroup>
     <ClCompile Include="AST.cpp" />
     <ClCompile Include="IR.cpp" />
-    <ClCompile Include="lexer.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="test.cpp" />
     <ClCompile Include="base.cpp" />
-    <ClCompile Include="yaccer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AST.h" />
     <ClInclude Include="IR.h" />
-    <ClInclude Include="test.h" />
     <ClInclude Include="base.h" />
-    <ClInclude Include="yaccer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -2313,12 +2313,12 @@ int yywrap() {
 }
 
 AST* getAST() {
-    freopen("data/example.c", "r", stdin);
     yyparse();
+    printTreeInfo(root, 0);
     return root;
 }
 
-int main(int argc, char **argv) {
+/*int main(int argc, char **argv) {
     if (argc <= 1) {
         yyparse();
         printTreeInfo(root, 0);
@@ -2336,4 +2336,4 @@ int main(int argc, char **argv) {
     printTreeInfo(root, 0);
 
     return 0;
-}
+}*/
