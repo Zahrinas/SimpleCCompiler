@@ -50,6 +50,8 @@ std::string AST_node::toStringExpr() {
 
 AST* newNode(dataType type, std::string s, int argc, ...) {
 	AST* now = new AST(AST_node(type));
+	
+	now->name = s;
 
 	if (argc == 0) return now;
 
@@ -64,10 +66,24 @@ AST* newNode(dataType type, std::string s, int argc, ...) {
 	}
 
 	if (temp != nullptr) {
-		now->son.push_back(temp);
+		if(now->child == nullptr){
+			now->child = temp;
+		}else{
+			AST* ch = now->child;
+			while(ch->next) ch = ch->next;
+			ch->next = temp;
+		}
 		for (int i = 1; i < argc; ++i) {
 			AST* next = va_arg(vaList, AST*);
-			if (next != nullptr)  now->son.push_back(next);
+			if (next != nullptr){
+				if(now->child == nullptr){
+					now->child = next;
+				}else{
+					AST* ch = now->child;
+					while(ch->next) ch = ch->next;
+					ch->next = next;
+				}
+			}
 		}
 	}
 	va_end(vaList);
@@ -76,4 +92,29 @@ AST* newNode(dataType type, std::string s, int argc, ...) {
 
 AST* newTerNode(dataType type, std::string s, datum v) {
 	return new AST(AST_node(type, v));
+}
+
+void printTreeInfo(AST* curNode, int height) {
+	if (curNode == NULL) {
+		return;
+	}
+
+	for (int i = 0; i < height; ++i) {
+		printf("  ");
+	}
+	printf("%s", curNode->name.c_str());
+	if (curNode->data.type == dataType::constant) {
+		if (curNode->data.value.type == dataType::int_type) {
+			printf("(%d)", curNode->data.value.getDataInt());
+		}
+		else if (curNode->data.value.type == dataType::double_type) {
+			printf("(%lf)", curNode->data.value.getDataDouble());
+		}
+	}
+	else if (curNode->data.type == dataType::string || curNode->data.type == dataType::name) {
+		printf("(%s)", curNode->data.value.getDataString().c_str());
+	}
+	printf("\n");
+	printTreeInfo(curNode->child, height + 1);
+	printTreeInfo(curNode->next, height);
 }

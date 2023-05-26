@@ -6,7 +6,9 @@
 template <typename T>
 struct tree {
 	T data;
-	std::vector<tree*> son;
+	tree<T>* child;
+	tree<T>*  next;
+	std::string name;
 
 	tree(T data);
 	tree<T>* insert(T data);
@@ -30,7 +32,7 @@ enum class dataType {
 	equal, not_equal, greater, less, greater_equal, less_equal,
 	band, bor, bxor, uminus,
 
-	assign,
+	assign_inst,
 	address, member, subscript,
 
 	label_decl,
@@ -56,11 +58,4 @@ struct datum {
 
 template <typename T>
 tree<T>::tree(T data) : data(data){
-}
-
-template <typename T>
-tree<T>* tree<T>::insert(T data) {
-	tree<T>* that = new tree<T>(data);
-	son.push_back(that);
-	return that;
 }
