@@ -1,4 +1,4 @@
-void Quicksort(int* a, int low, int high) {
+void Quicksort(int * a, int low, int high) {
 
     if (low < high) {
     	
@@ -55,7 +55,7 @@ int main() {
     
     scanf("%d", &N);
 
-    int* a;
+    int * a;
 	a = malloc(400000);
     
     i = 0;

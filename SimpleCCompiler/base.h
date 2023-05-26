@@ -58,7 +58,7 @@ struct datum {
 };
 
 template <typename T>
-tree<T>::tree(T data) : data(data), child(nullptr), next(nullptr){
+tree<T>::tree(T data) : data(data), next(nullptr), child(nullptr) {
 }
 
 template <typename T>
