@@ -62,6 +62,7 @@ semicolon \;
             }
 			if (yytext[0]== 'v') {
                 printf("void ");
+                return VOID;
             }
 		}
 

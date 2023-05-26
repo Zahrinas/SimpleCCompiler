@@ -76,20 +76,21 @@ extern int yydebug;
     INT = 282,
     DOUBLE = 283,
     CHAR = 284,
-    LP = 285,
-    RP = 286,
-    LB = 287,
-    RB = 288,
-    LC = 289,
-    RC = 290,
-    RETURN = 291,
-    IF = 292,
-    ELSE = 293,
-    WHILE = 294,
-    UMINUS = 295,
-    USTAR = 296,
-    UBAND = 297,
-    LOWER_THAN_ELSE = 298
+    VOID = 285,
+    LP = 286,
+    RP = 287,
+    LB = 288,
+    RB = 289,
+    LC = 290,
+    RC = 291,
+    RETURN = 292,
+    IF = 293,
+    ELSE = 294,
+    WHILE = 295,
+    UMINUS = 296,
+    USTAR = 297,
+    UBAND = 298,
+    LOWER_THAN_ELSE = 299
   };
 #endif
 
@@ -104,7 +105,7 @@ union YYSTYPE
     char *strval;
     struct node * ast;
 
-#line 108 "yacc.tab.h"
+#line 109 "yacc.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
