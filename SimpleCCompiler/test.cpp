@@ -51,7 +51,7 @@ AST* getExampleAST1() {
 	return nr;
 }
 
-//array
+//subscript
 AST* getExampleAST2() {
 	AST* n0 = new AST(AST_node(dataType::program));
 

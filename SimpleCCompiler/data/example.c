@@ -1,6 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-
 int func(int a){
 	printf("%d\n", a);
 	return 100;

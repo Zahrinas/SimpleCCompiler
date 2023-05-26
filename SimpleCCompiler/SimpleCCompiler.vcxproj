@@ -86,8 +86,8 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>false</ConformanceMode>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -141,22 +141,18 @@
   <ItemGroup>
     <ClCompile Include="AST.cpp" />
     <ClCompile Include="IR.cpp" />
+    <ClCompile Include="lexer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="test.cpp" />
     <ClCompile Include="base.cpp" />
+    <ClCompile Include="yaccer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AST.h" />
     <ClInclude Include="IR.h" />
     <ClInclude Include="test.h" />
     <ClInclude Include="base.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="data\clang.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="data\example.ll" />
-    <None Include="data\ex_linux.ll" />
+    <ClInclude Include="yaccer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

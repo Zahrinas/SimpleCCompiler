@@ -1,7 +1,7 @@
 #include <fstream>
 
 #include "ast.h"
-#include "IR.h"
+#include "ir.h"
 
 Expression::Expression(std::string t, std::string v) : type(t), value(v){
 }
@@ -231,7 +231,7 @@ IRdata_LLVM ast2ir(AST* ast) {
 	ret.datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128";
 	ret.triple = "x86_64-pc-linux-gnu";
 
-	ret.parseAST(ast);
+	ret.parseAST(ast->son[0]);
 
 	return ret;
 }

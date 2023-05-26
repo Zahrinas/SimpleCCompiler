@@ -5,13 +5,13 @@
 #include<algorithm>
 using namespace std;
 
+#include "ir.h"
 #include "ast.h"
-#include "IR.h"
 #include "test.h"
 
 string fileName;
 signed main(signed, char**, char**) {
-	AST* ast = getExampleAST5();
+	AST* ast = getAST();
 	IRdata_LLVM ir = ast2ir(ast);
 	ir.printIR("data/gen.ll");
 }

@@ -1,3 +1,6 @@
+#include <cstdarg>
+#include <fstream>
+
 #include "ast.h"
 
 AST_node::AST_node(dataType t, datum v) : type(t), value(v) {
@@ -43,4 +46,34 @@ std::string AST_node::toStringExpr() {
 		else throw std::unexpected;
 	}
 	else throw std::unexpected;
+}
+
+AST* newNode(dataType type, std::string s, int argc, ...) {
+	AST* now = new AST(AST_node(type));
+
+	if (argc == 0) return now;
+
+	va_list vaList;
+	va_start(vaList, argc);
+
+	AST* temp = va_arg(vaList, AST*);
+
+	while (temp == nullptr && argc > 1) {
+		temp = va_arg(vaList, AST*);
+		--argc;
+	}
+
+	if (temp != nullptr) {
+		now->son.push_back(temp);
+		for (int i = 1; i < argc; ++i) {
+			AST* next = va_arg(vaList, AST*);
+			if (next != nullptr)  now->son.push_back(next);
+		}
+	}
+	va_end(vaList);
+	return now;
+}
+
+AST* newTerNode(dataType type, std::string s, datum v) {
+	return new AST(AST_node(type, v));
 }
