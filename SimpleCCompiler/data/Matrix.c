@@ -12,9 +12,12 @@ int main() {
     ColB = 0;
     ColC = 0;
 
-    int * DataA = malloc(2500);
-    int * DataB = malloc(2500);
-    int * DataC = malloc(2500);
+    int * DataA;
+    int * DataB;
+    int * DataC;
+	DataA = malloc(2500);
+    DataB = malloc(2500);
+	DataC = malloc(2500);
 
     int i;
 	int j;
@@ -63,11 +66,11 @@ label3:
             if (j < ColC) {
                 DataC[i * ColC + j] = 0;
                 k = 0;
-            loop7:
+            label7:
 				if (k < ColA) {
                     DataC[i * ColC + j] = DataC[i * ColC + j] + DataA[i * ColA + k] * DataB[k * ColB + j];
                     k = k + 1;
-                    goto loop7;
+                    goto label7;
                 }
                 j = j + 1;
                 goto label6;
