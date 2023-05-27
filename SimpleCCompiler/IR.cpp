@@ -6,6 +6,15 @@
 Expression::Expression(std::string t, std::string v) : type(t), value(v){
 }
 
+int Expression::bits(){
+	if(type == "i8") return 8;
+	if(type == "i32") return 32;
+	if(type == "double") return 64;
+	if(type == "i8*") return 64;
+	if(type == "i32*") return 64;
+	if(type == "double*") return 64;
+}
+
 binding::binding(std::string type, std::string name, std::string ptr, std::string IRname)
 	: type(type), name(name), ptr(ptr), IRname(IRname) {
 }
@@ -73,9 +82,15 @@ Expression IRdata_LLVM::parseSequence(IR_funct& fun, AST* ast) {
 		Expression a = parseSequence(fun, ast->son(0));
 		Expression b = parseSequence(fun, ast->son(1));
 		if (a.type != b.type) {
-			++fun.instCnt;
-			fun.body.push_back("%" + std::to_string(fun.instCnt) + " = bitcast " + b.type + " " + b.value + " to " + a.type);
-			b.type = a.type, b.value = "%" + std::to_string(fun.instCnt);
+			if(a.bits() < b.bits()){
+				++fun.instCnt;
+				fun.body.push_back("%" + std::to_string(fun.instCnt) + " = trunc " + b.type + " " + b.value + " to " + a.type);
+				b.type = a.type, b.value = "%" + std::to_string(fun.instCnt);
+			}else if(a.bits() == b.bits()){
+				++fun.instCnt;
+				fun.body.push_back("%" + std::to_string(fun.instCnt) + " = bitcast " + b.type + " " + b.value + " to " + a.type);
+				b.type = a.type, b.value = "%" + std::to_string(fun.instCnt);
+			}
 		}
 		fun.body.push_back("store " + b.type + " " + b.value + ", " + a.type + "* " + fun.alloc[a.value]);
 		for (int i = 0; i < fun.bind.size(); ++i) if (fun.bind[i].ptr == fun.alloc[a.value]) fun.bind[i].IRname = "";
@@ -155,6 +170,17 @@ Expression IRdata_LLVM::parseSequence(IR_funct& fun, AST* ast) {
 		Expression a = parseSequence(fun, ast->son(0));
 		for (int i = 0; i < fun.bind.size(); ++i) if (fun.bind[i].ptr == fun.alloc[a.value]) fun.bind[i].IRname = "";
 		return Expression(a.type + "*", fun.alloc[a.value]);
+	}
+	case dataType::member: {
+		Expression a = parseSequence(fun, ast->son(0));
+		++fun.instCnt;
+		fun.body.push_back("%" + std::to_string(fun.instCnt)
+			+ " = load " + a.type + ", " + a.type + "* " + fun.alloc[a.value]);
+		++fun.instCnt;
+		fun.body.push_back("%" + std::to_string(fun.instCnt)
+			+ " = load " + a.type.substr(0, a.type.length() - 1) + ", " + a.type + " %" + std::to_string(fun.instCnt - 1));
+		fun.alloc["%" + std::to_string(fun.instCnt)] = "%" + std::to_string(fun.instCnt - 1);
+		return Expression(a.type.substr(0, a.type.length() - 1), "%" + std::to_string(fun.instCnt));
 	}
 	case dataType::subscript: {
 		Expression a = parseSequence(fun, ast->son(0));
@@ -251,6 +277,33 @@ Expression IRdata_LLVM::parseSequence(IR_funct& fun, AST* ast) {
 				+ ast->son(1)->data.toStringExpr() + ")";
 			fun.body.push_back(str);
 			return Expression("i8*", "%" + std::to_string(fun.instCnt));
+		}
+		else if(ast->son(0)->data.value.getDataString() == "strchr") {
+			Expression a = parseSequence(fun, ast->son(1));
+			Expression b = parseSequence(fun, ast->son(2));
+			++fun.instCnt;
+			std::string str = "%" + std::to_string(fun.instCnt) + " = call i8* @strchr( "
+				+ a.type + " " + a.value + ", "
+				+ b.type + " " + b.value + ")";
+			fun.body.push_back(str);
+			return Expression("i8*", "%" + std::to_string(fun.instCnt));
+		}
+		else if(ast->son(0)->data.value.getDataString() == "sscanf") {
+			std::string str= "";
+			for (AST* ptr = ast->son(3); ptr; ptr = ptr->next) {
+				Expression a = parseSequence(fun, ptr);
+				str += ", " + a.type + " " + a.value;
+			}
+			Expression a = parseSequence(fun, ast->son(1));
+			++fun.instCnt;
+			str = "%" + std::to_string(fun.instCnt)
+				+ " = call i32 (i8*, i8*, ...) @sscanf(i8* getelementptr inbounds ("
+				+ a.type + ", " + a.type + "* "
+				+ a.value + ", i64 0, i64 0), i8* getelementptr inbounds (" 
+				+ ast->son(2)->data.toLLVM_type() + ", " + ast->son(2)->data.toLLVM_type() + "* "
+				+ getVarId(fun, ast->son(2)->data) + str + ")";
+			fun.body.push_back(str);
+			return Expression("i32", "%" + std::to_string(fun.instCnt));
 		}
 		else {
 			std::string str = "", strp = "";
@@ -401,4 +454,6 @@ void IRdata_LLVM::printIR(std::string filename) {
 	fout << "declare i32 @scanf(i8*, ...)" << std::endl;
 	fout << "declare i32 @printf(i8*, ...)" << std::endl;
 	fout << "declare i8* @malloc(i64)" << std::endl;
+	fout << "declare i8* @strchr(i8*, i32)" << std::endl;
+	fout << "declare i32 @sscanf(i8*, i8*, ...)" << std::endl;
 }

@@ -84,6 +84,7 @@ ExtDef : Specifier ExtDecList SEMI {
 }    // global variable declaration, e.g. int;
     | Specifier FunDec CompSt {
     $3->next = $2->next;
+    $2->next = nullptr;
     $$ = newNode(dataType::func_decl, "func_decl", 3, $1, $2, $3);
 };  // function definition, e.g. int main() { ... }
 
@@ -103,7 +104,16 @@ ExtDec : VarDec {
 };  // variable definition with initialization, e.g. a[10][2] = 1;
 
 // Specifiers
-Specifier : INT {
+Specifier : INT STAR {
+    $$ = newNode(dataType::int_pointer, "int_pointer", 0);
+}   
+    | DOUBLE STAR {
+    $$ = newNode(dataType::double_pointer, "double_pointer", 0);
+}   
+    | CHAR STAR {
+    $$ = newNode(dataType::char_pointer, "char_pointer", 0);
+}   
+    | INT {
     $$ = newNode(dataType::int_type, "int_type", 0);
 }
     | DOUBLE {

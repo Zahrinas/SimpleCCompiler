@@ -530,7 +530,7 @@ char *yytext;
     #include <malloc.h>
     #include "yacc.tab.h"
 
-    char name[20];
+    char name[100];
     int val_int = 0;
     double val_double = 0;  
 #line 537 "lex.yy.c"

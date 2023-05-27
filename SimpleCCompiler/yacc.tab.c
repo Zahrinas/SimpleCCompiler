@@ -1546,7 +1546,7 @@ yyreduce:
   case 14: /* Specifier: CHAR STAR  */
 #line 113 "yacc.y"
                 {
-    (yyval.ast) = newNode(dataType::double_pointer, "char_pointer", 0);
+    (yyval.ast) = newNode(dataType::char_pointer, "char_pointer", 0);
 }
 #line 1552 "y.tab.c"
     break;

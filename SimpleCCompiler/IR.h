@@ -15,6 +15,7 @@ struct Expression {
 	std::string value;
 
 	Expression(std::string t, std::string v);
+	int bits();
 };
 
 struct binding {
