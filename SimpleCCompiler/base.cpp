@@ -32,7 +32,7 @@ datum::datum(dataType dt) {
 	else if (dt == dataType::int_type) this->ptr = new int();
 	else if (dt == dataType::double_type) this->ptr = new double();
 	else if (dt == dataType::string) this->ptr = new std::string();
-	else throw std::unexpected;
+	else throw std::exception();
 }
 
 bool datum::operator==(datum b) {
@@ -40,7 +40,7 @@ bool datum::operator==(datum b) {
 	if (type == dataType::int_type) return *(int*)ptr == *(int*)b.ptr;
 	else if (type == dataType::double_type) return *(double*)ptr == *(double*)b.ptr;
 	else if (type == dataType::string) return *(std::string*)ptr == *(std::string*)b.ptr;
-	else throw std::unexpected;
+	else throw std::exception();
 }
 
 int datum::getDataInt() {

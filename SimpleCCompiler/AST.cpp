@@ -1,7 +1,7 @@
 #include <cstdarg>
 #include <fstream>
 
-#include "ast.h"
+#include "AST.h"
 
 AST_node::AST_node(dataType t, datum v) : type(t), value(v) {
 }

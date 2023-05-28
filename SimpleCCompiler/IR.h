@@ -4,7 +4,7 @@
 #include <map>
 
 #include "base.h"
-#include "ast.h"
+#include "AST.h"
 
 enum class ExpType {
 	constant, variable, voidtype

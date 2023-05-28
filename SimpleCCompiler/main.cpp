@@ -5,8 +5,8 @@
 #include<algorithm>
 using namespace std;
 
-#include "ir.h"
-#include "ast.h"
+#include "IR.h"
+#include "AST.h"
 
 string fileName;
 signed main(signed, char**, char**) {

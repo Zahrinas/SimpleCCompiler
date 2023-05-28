@@ -1,7 +1,7 @@
 #include <fstream>
 
-#include "ast.h"
-#include "ir.h"
+#include "AST.h"
+#include "IR.h"
 
 Expression::Expression(std::string t, std::string v) : type(t), value(v){
 }
@@ -13,6 +13,7 @@ int Expression::bits(){
 	if(type == "i8*") return 64;
 	if(type == "i32*") return 64;
 	if(type == "double*") return 64;
+	throw std::exception();
 }
 
 binding::binding(std::string type, std::string name, std::string ptr, std::string IRname)
