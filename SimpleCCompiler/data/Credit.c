@@ -73,8 +73,8 @@ int storeOrSeq(char* src, int* cnt, char* name, int* andsize, int* orsize, int* 
 			}
 		}
 		
-		src = src + 1;
-		src = src + store(buf, src);
+		src = &src[1];
+		src = &src[store(buf, src)];
 		
 		int mems;
 		
@@ -83,15 +83,10 @@ int storeOrSeq(char* src, int* cnt, char* name, int* andsize, int* orsize, int* 
 		
 		label5:
 		if(i <= *cnt){
-			if(strcmp(buf, name + i * 10) == 0){
-				mems = i;
-				goto label6;
-			}
+			if(strcmp(buf, &name[i * 10]) == 0) mems = i;
 			i = i + 1;
 			goto label5;
 		}
-		
-		label6:
 		
 		if(cfirst != 0){
 			*andsize = *andsize + 1;
@@ -110,39 +105,44 @@ int storeOrSeq(char* src, int* cnt, char* name, int* andsize, int* orsize, int* 
 	return heador;
 }
 
-double getGPA(int* cnt, char* grade, int* credit){
+double getGPA(int* cnt, char* grade, double* credit){
 	double sum;
-	int xcnt;
+	double xcnt;
 	int i;
-	xcnt = 0;
-	sum = 0;
+	int flag;
+	xcnt = 0.0;
+	sum = 0.0;
 	i = 1;
+	flag = 0;
 	
 	label7:
 	if(i <= *cnt){
-		if(grade[i]) xcnt = xcnt + credit[i];
-		if(grade[i] == 65) sum = sum + credit[i] * 4;
-		if(grade[i] == 66) sum = sum + credit[i] * 3;
-		if(grade[i] == 67) sum = sum + credit[i] * 2;
-		if(grade[i] == 68) sum = sum + credit[i] * 1;
+		if(grade[i] != 0){
+			flag = 1;
+			xcnt = xcnt + credit[i];
+		}
+		if(grade[i] == 65) sum = sum + credit[i] * 4.0;
+		if(grade[i] == 66) sum = sum + credit[i] * 3.0;
+		if(grade[i] == 67) sum = sum + credit[i] * 2.0;
+		if(grade[i] == 68) sum = sum + credit[i] * 1.0; 
 		i = i + 1;
 		goto label7;
 	}
 	
 	sum = sum / xcnt;
-	if(xcnt == 0) sum = 0.0;
+	if(flag == 0) sum = 0.0;
 	return sum;
 }
 
-int getAttempted(int* cnt, char* grade, int* credit){
-	int xcnt;
+double getAttempted(int* cnt, char* grade, double* credit){
+	double xcnt;
 	int i;
-	xcnt = 0;
+	xcnt = 0.0;
 	i = 1;
 	
 	label8:
 	if(i <= *cnt){
-		if(grade[i]) xcnt = xcnt + credit[i];
+		if(grade[i] != 0) xcnt = xcnt + credit[i];
 		i = i + 1;
 		goto label8;
 	}
@@ -150,10 +150,10 @@ int getAttempted(int* cnt, char* grade, int* credit){
 	return xcnt;
 }
 
-int getCompleted(int* cnt, char* grade, int* credit){
-	int xcnt;
+double getCompleted(int* cnt, char* grade, double* credit){
+	double xcnt;
 	int i;
-	xcnt = 0;
+	xcnt = 0.0;
 	i = 1;
 	
 	label9:
@@ -168,10 +168,10 @@ int getCompleted(int* cnt, char* grade, int* credit){
 	return xcnt;
 }
 
-int getRemaining(int* cnt, char* grade, int* credit){
-	int xcnt;
+double getRemaining(int* cnt, char* grade, double* credit){
+	double xcnt;
 	int i;
-	xcnt = 0;
+	xcnt = 0.0;
 	i = 1;
 	
 	label10:
@@ -225,11 +225,13 @@ int main(){
 	int* ornext;
 	int* andlist;
 	int* andnext;
-	int* credit;
 	int* orhead;
+	
+	double* credit;
 	
 	int i;
 	int cnt;
+	int flag;
 	int xcnt;
 	int orsize;
 	int andsize;
@@ -240,66 +242,76 @@ int main(){
 	char* s;
 	
 	orlist = malloc(5000);
-	memset(orlist, 0, 5000);
+	s = orlist;
+	memset(s, 0, 5000);
 	ornext = malloc(5000);
-	memset(ornext, 0, 5000);
+	s = ornext;
+	memset(s, 0, 5000);
 	andlist = malloc(50000);
-	memset(andlist, 0, 5000);
+	s = andlist;
+	memset(s, 0, 50000);
 	andnext = malloc(50000);
-	memset(andnext, 0, 5000);
+	s = andnext;
+	memset(s, 0, 50000);
 	
-	credit = malloc(500);
+	credit = malloc(1000);
 	orhead = malloc(500);
 	grade = malloc(200);
 	
 	input = malloc(200000);
 	name = malloc(4000);
 	
+	cnt = 0;
+	xcnt = 0;
+	flag = 0;
 	orsize = 0;
 	andsize = 0;
 	
 	label13:
 	{
 		cnt = cnt + 1;
-		gets(input + cnt * 1000);
+		gets(&input[cnt * 1000]);
 		if(input[cnt * 1000] == 0){
 			cnt = cnt - 1;
-			goto label14;
+			flag = 1;
 		}
-		goto label13;
+		if(flag != 1) goto label13;
 	}
 	
-	label14:
+	flag = 0;
 		
 	i = 1;
 	
 	label15:
 	if(i <= cnt){
-		store(name + i * 10, input + i * 1000);
+		store(&name[i * 10], &input[i * 1000]);
 		i = i + 1;
 		goto label15;
 	}
+	
 	
 	i = 1;
 	
 	label16:
 	if(i <= cnt){
-		s = input + i * 1000;
-		s = strchr(s, 124) + 1;
-		sscanf(s, "%d", &credit[i]);
+		s = &input[i * 1000];
+		s = strchr(s, 124);
+		s = &s[1];
+		sscanf(s, "%lf", &credit[i]);
 		s = strchr(s, 124);
 		orhead[i] = storeOrSeq(s, &cnt, name, &andsize, &orsize, andlist, orlist, andnext, ornext);
-		s = s + 1;
-		s = strchr(s, 124) + 1;
+		s = &s[1];
+		s = strchr(s, 124);
+		s = &s[1];
 		if(s[0] != 10) grade[i] = s[0];
 		i = i + 1;
 		goto label16;
 	}
 	
 	printf("GPA: %.1lf\n", getGPA(&cnt, grade, credit));
-	printf("Hours Attempted: %d\n", getAttempted(&cnt, grade, credit));
-	printf("Hours Completed: %d\n", getCompleted(&cnt, grade, credit));
-	printf("Credits Remaining: %d\n", getRemaining(&cnt, grade, credit));
+	printf("Hours Attempted: %.0lf\n", getAttempted(&cnt, grade, credit));
+	printf("Hours Completed: %.0lf\n", getCompleted(&cnt, grade, credit));
+	printf("Credits Remaining: %.0lf\n", getRemaining(&cnt, grade, credit));
 	printf("\nPossible Courses to Take Next\n");
 	
 	i = 1;
@@ -307,25 +319,23 @@ int main(){
 	label17:
 	if(i <= cnt){
 		if(grade[i] == 0){
-			if(Satisfied(orhead[i], orlist, ornext, andlist, andnext, grade)){
+			flag = 1;
+			if(Satisfied(orhead[i], orlist, ornext, andlist, andnext, grade) != 0){
 				xcnt = xcnt + 1;
-				printf("  %s\n", name + i * 10);
+				printf("  %s\n", &name[i * 10]);
 			}
 		}
 		if(grade[i] == 70){
-			if(Satisfied(orhead[i], orlist, ornext, andlist, andnext, grade)){
+			flag = 1;
+			if(Satisfied(orhead[i], orlist, ornext, andlist, andnext, grade) != 0){
 				xcnt = xcnt + 1;
-				printf("  %s\n", name +i * 10);
+				printf("  %s\n", &name[i * 10]);
 			}
 		}
 		i = i + 1;
 		goto label17;
 	}
 	
-	if(getRemaining(&cnt, grade, credit) == 0){
-		if(xcnt == 0){
-			printf("  None - Congratulations!\n");
-		}
-	}
+	if(flag == 0) printf("  None - Congratulations!\n");
 	return 0;
 }

@@ -101,28 +101,32 @@ Expression IRdata_LLVM::parseSequence(IR_funct& fun, AST* ast) {
 		Expression a = parseSequence(fun, ast->son(0));
 		Expression b = parseSequence(fun, ast->son(1));
 		++fun.instCnt;
-		fun.body.push_back("%" + std::to_string(fun.instCnt) + " = add " + a.type + " " + a.value + ", " + b.value);
+		if(a.type == "double") fun.body.push_back("%" + std::to_string(fun.instCnt) + " = fadd " + a.type + " " + a.value + ", " + b.value);
+		else fun.body.push_back("%" + std::to_string(fun.instCnt) + " = add " + a.type + " " + a.value + ", " + b.value);
 		return Expression(a.type, "%" + std::to_string(fun.instCnt));
 	}
 	case dataType::minus: {
 		Expression a = parseSequence(fun, ast->son(0));
 		Expression b = parseSequence(fun, ast->son(1));
 		++fun.instCnt;
-		fun.body.push_back("%" + std::to_string(fun.instCnt) + " = sub " + a.type + " " + a.value + ", " + b.value);
+		if(a.type == "double") fun.body.push_back("%" + std::to_string(fun.instCnt) + " = fsub " + a.type + " " + a.value + ", " + b.value);
+		else fun.body.push_back("%" + std::to_string(fun.instCnt) + " = sub " + a.type + " " + a.value + ", " + b.value);
 		return Expression(a.type, "%" + std::to_string(fun.instCnt));
 	}
 	case dataType::multiply: {
 		Expression a = parseSequence(fun, ast->son(0));
 		Expression b = parseSequence(fun, ast->son(1));
 		++fun.instCnt;
-		fun.body.push_back("%" + std::to_string(fun.instCnt) + " = mul " + a.type + " " + a.value + ", " + b.value);
+		if(a.type == "double") fun.body.push_back("%" + std::to_string(fun.instCnt) + " = fmul " + a.type + " " + a.value + ", " + b.value);
+		else fun.body.push_back("%" + std::to_string(fun.instCnt) + " = mul " + a.type + " " + a.value + ", " + b.value);
 		return Expression(a.type, "%" + std::to_string(fun.instCnt));
 	}
 	case dataType::divide: {
 		Expression a = parseSequence(fun, ast->son(0));
 		Expression b = parseSequence(fun, ast->son(1));
 		++fun.instCnt;
-		fun.body.push_back("%" + std::to_string(fun.instCnt) + " = div " + a.type + " " + a.value + ", " + b.value);
+		if(a.type == "double") fun.body.push_back("%" + std::to_string(fun.instCnt) + " = fdiv " + a.type + " " + a.value + ", " + b.value);
+		else fun.body.push_back("%" + std::to_string(fun.instCnt) + " = div " + a.type + " " + a.value + ", " + b.value);
 		return Expression(a.type, "%" + std::to_string(fun.instCnt));
 	}
 	case dataType::less: {
@@ -274,7 +278,7 @@ Expression IRdata_LLVM::parseSequence(IR_funct& fun, AST* ast) {
 		else if(ast->son(0)->data.value.getDataString() == "malloc") {
 			Expression a = parseSequence(fun, ast->son(1));
 			++fun.instCnt;
-			std::string str = "%" + std::to_string(fun.instCnt) + " = call i8* @malloc(i64 "
+			std::string str = "%" + std::to_string(fun.instCnt) + " = call i8* (i64) @malloc(i64 "
 				+ ast->son(1)->data.toStringExpr() + ")";
 			fun.body.push_back(str);
 			return Expression("i8*", "%" + std::to_string(fun.instCnt));
@@ -283,7 +287,7 @@ Expression IRdata_LLVM::parseSequence(IR_funct& fun, AST* ast) {
 			Expression a = parseSequence(fun, ast->son(1));
 			Expression b = parseSequence(fun, ast->son(2));
 			++fun.instCnt;
-			std::string str = "%" + std::to_string(fun.instCnt) + " = call i8* @strchr( "
+			std::string str = "%" + std::to_string(fun.instCnt) + " = call i8* (i8*, i32) @strchr( "
 				+ a.type + " " + a.value + ", "
 				+ b.type + " " + b.value + ")";
 			fun.body.push_back(str);
@@ -298,11 +302,37 @@ Expression IRdata_LLVM::parseSequence(IR_funct& fun, AST* ast) {
 			Expression a = parseSequence(fun, ast->son(1));
 			++fun.instCnt;
 			str = "%" + std::to_string(fun.instCnt)
-				+ " = call i32 (i8*, i8*, ...) @sscanf(i8* getelementptr inbounds ("
-				+ a.type + ", " + a.type + "* "
-				+ a.value + ", i64 0, i64 0), i8* getelementptr inbounds (" 
+				+ " = call i32 (i8*, i8*, ...) @sscanf("
+				+ a.type + " " + a.value + ", i8* getelementptr inbounds (" 
 				+ ast->son(2)->data.toLLVM_type() + ", " + ast->son(2)->data.toLLVM_type() + "* "
-				+ getVarId(fun, ast->son(2)->data) + str + ")";
+				+ getVarId(fun, ast->son(2)->data) + ", i64 0, i64 0)" + str + ")";
+			fun.body.push_back(str);
+			return Expression("i32", "%" + std::to_string(fun.instCnt));
+		}
+		else if(ast->son(0)->data.value.getDataString() == "strcmp") {
+			Expression a = parseSequence(fun, ast->son(1));
+			Expression b = parseSequence(fun, ast->son(2));
+			++fun.instCnt;
+			std::string str = "%" + std::to_string(fun.instCnt) + " = call i32 (i8*, i8*) @strcmp( "
+				+ a.type + " " + a.value + ", "
+				+ b.type + " " + b.value + ")";
+			fun.body.push_back(str);
+			return Expression("i32", "%" + std::to_string(fun.instCnt));
+		}
+		else if(ast->son(0)->data.value.getDataString() == "memset") {
+			Expression a = parseSequence(fun, ast->son(1));
+			Expression b = parseSequence(fun, ast->son(2));
+			Expression c = parseSequence(fun, ast->son(3));
+			std::string str = "call void (i8*, i8, i64) @memset( "
+				+ a.type + " " + a.value + ", " + "i8 " + b.value + ", " + "i64 " + c.value + ")";
+			fun.body.push_back(str);
+			return Expression("void", "");
+		}
+		else if(ast->son(0)->data.value.getDataString() == "gets") {
+			Expression a = parseSequence(fun, ast->son(1));
+			++fun.instCnt;
+			std::string str = "%" + std::to_string(fun.instCnt) + " = call i32 (...) @gets( "
+				+ a.type + " " + a.value + ")";
 			fun.body.push_back(str);
 			return Expression("i32", "%" + std::to_string(fun.instCnt));
 		}
@@ -457,4 +487,7 @@ void IRdata_LLVM::printIR(std::string filename) {
 	fout << "declare i8* @malloc(i64)" << std::endl;
 	fout << "declare i8* @strchr(i8*, i32)" << std::endl;
 	fout << "declare i32 @sscanf(i8*, i8*, ...)" << std::endl;
+	fout << "declare i32 @strcmp(i8*, i8*)" << std::endl;
+	fout << "declare void @memset(i8*, i8, i64)" << std::endl;
+	fout << "declare i32 @gets(...)" << std::endl;
 }
