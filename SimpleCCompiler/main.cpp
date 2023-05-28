@@ -10,10 +10,9 @@ using namespace std;
 
 string fileName;
 signed main(signed argc, char** argv, char** env) {
-	if(argc > 1){
-	    freopen(argv[1], "r", stdin);
-		AST* ast = getAST();
-		IRdata_LLVM ir = ast2ir(ast);
-		ir.printIR("gen.ll");
-	}
+	if(argc > 1) freopen(argv[1], "r", stdin);
+	else freopen("data/Credit.c", "r", stdin);
+	AST* ast = getAST();
+	IRdata_LLVM ir = ast2ir(ast);
+	ir.printIR("gen.ll");
 }
