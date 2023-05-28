@@ -1,5 +1,5 @@
 cd SimpleCCompiler
 make all
-./gen data/Credit.c
+./gen data/$1
 clang gen.ll -o pr
 ./pr
