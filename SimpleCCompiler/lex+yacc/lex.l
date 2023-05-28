@@ -1,15 +1,16 @@
 %{
     #include <string.h>
+    #include <malloc.h>
     #include "yacc.tab.h"
 
     char name[20];
     int val_int = 0;
-    double val_double = 0;
+    double val_double = 0;  
 %}
 
 ALPHA [a-zA-Z]
 VAR   {ALPHA}+[a-zA-Z0-9_]*
-KEY   int|double|char|void
+KEY   int|double|char|void|goto
 Return return 
 IF    if
 ELSE  else
@@ -45,8 +46,16 @@ OR    \|\|
 NOT   \!
 comma \,
 semicolon \;
+colon \:
+LABEL  label+[a-zA-Z0-9_]*
 
 %%
+{LABEL}   {
+		strcpy(name, yytext);
+		printf("label(%s) ",name);
+        yylval.labelval = name;
+        return LABEL;
+	}
 {KEY}   { 
 			if (yytext[0]=='i') {
                 printf("int ");
@@ -62,6 +71,11 @@ semicolon \;
             }
 			if (yytext[0]== 'v') {
                 printf("void ");
+                return VOID;
+            }
+            if (yytext[0]== 'g') {
+                printf("goto ");
+                return GOTO;
             }
 		}
 
@@ -100,6 +114,10 @@ semicolon \;
 			printf("semicolon ");
             return SEMI;
 		}
+{colon}    {
+        printf("colon ");
+        return COLON;
+        }
 {Return}   {
 			printf("return ");
             return RETURN;
@@ -192,7 +210,7 @@ semicolon \;
 {VAR}   {
 			strcpy(name, yytext);
 			printf("name(%s) ",name);
-            yylval.strval = name;
+            yylval.idval = strdup(name);
             return ID;
 		}
 {IVALUE} {

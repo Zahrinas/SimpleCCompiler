@@ -12,3 +12,8 @@ struct AST_node {
 };
 
 typedef tree<AST_node> AST;
+
+AST* getAST();
+AST* newNode(dataType type, std::string s, int argc, ...);
+AST* newTerNode(dataType type, std::string s, datum v);
+void printTreeInfo(AST* curNode, int height);

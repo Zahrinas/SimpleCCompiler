@@ -15,11 +15,13 @@ int main() {
     ColB = 0;
     ColC = 0;
 
-    int* DataA = malloc(sizeof(int) * 625);
-    int* DataB = malloc(sizeof(int) * 625);
-    int* DataC = malloc(sizeof(int) * 625);
+    int* DataA = malloc(2500);
+    int* DataB = malloc(2500);
+    int* DataC = malloc(2500);
 
-    int i, j, k;
+    int i;
+	int j;
+	int k;
 
     scanf("%d %d", &RowA, &ColA);
     i = 0;

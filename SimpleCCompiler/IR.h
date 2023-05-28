@@ -4,7 +4,7 @@
 #include <map>
 
 #include "base.h"
-#include "ast.h"
+#include "AST.h"
 
 enum class ExpType {
 	constant, variable, voidtype
@@ -15,6 +15,7 @@ struct Expression {
 	std::string value;
 
 	Expression(std::string t, std::string v);
+	int bits();
 };
 
 struct binding {
