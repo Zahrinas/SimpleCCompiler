@@ -5,7 +5,7 @@ LINKOBJ  = AST.o base.o IR.o main.o lex.yy.o yacc.tab.o
 BIN      = gen
 CXXFLAGS = $(CXXINCS) -m64 -Wall -g3
 CFLAGS   = $(INCS) -m64 -Wall -g3
-RM       = del /q
+RM       = rm
 
 .PHONY: all all-before all-after clean clean-custom
 
