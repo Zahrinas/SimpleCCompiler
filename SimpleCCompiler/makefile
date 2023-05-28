@@ -1,7 +1,7 @@
 CPP      = clang++
 CC       = clang
-OBJ      = AST.o base.o IR.o main.o lex.yy.o yacc.tab.o
-LINKOBJ  = AST.o base.o IR.o main.o lex.yy.o yacc.tab.o
+OBJ      = AST.o base.o IR.o main.o lex.yy.o y.tab.o
+LINKOBJ  = AST.o base.o IR.o main.o lex.yy.o y.tab.o
 BIN      = gen
 CXXFLAGS = $(CXXINCS) -m64 -Wall -g3
 CFLAGS   = $(INCS) -m64 -Wall -g3
@@ -32,5 +32,5 @@ main.o: main.cpp
 lex.yy.o: lex.yy.c
 	$(CPP) -c lex.yy.c -o lex.yy.o $(CXXFLAGS)
 
-yacc.tab.o: yacc.tab.c
-	$(CPP) -c yacc.tab.c -o yacc.tab.o $(CXXFLAGS)
+y.tab.o: y.tab.c
+	$(CPP) -c y.tab.c -o y.tab.o $(CXXFLAGS)
