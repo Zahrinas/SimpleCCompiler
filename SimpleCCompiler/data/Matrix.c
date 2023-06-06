@@ -15,36 +15,38 @@ int main() {
     int * DataA;
     int * DataB;
     int * DataC;
-	DataA = malloc(2500);
-    DataB = malloc(2500);
-	DataC = malloc(2500);
+	DataA = malloc(5000);
+    DataB = malloc(5000);
+	DataC = malloc(5000);
 
     int i;
 	int j;
 	int k;
 
-    scanf("%d %d", &RowA, &ColA);
+    scanf("%lld", &RowA);
+    scanf("%lld", &ColA);
     i = 0;
 label1:
     if (i < RowA) {
         j = 0;
     label2:
         if (j < ColA) {
-            scanf("%d", &DataA[i * ColA + j]);
+            scanf("%lld", &DataA[i * ColA + j]);
             j = j + 1;
             goto label2;
         }
         i = i + 1;
         goto label1;
     }
-    scanf("%d %d", &RowB, &ColB);
+    scanf("%lld", &RowB);
+    scanf("%lld", &ColB);
     i = 0;
 label3:
     if (i < RowB) {
         j = 0;
     label4:
         if (j < ColB) {
-            scanf("%d", &DataB[i * ColB + j]);
+            scanf("%lld", &DataB[i * ColB + j]);
             j = j + 1;
             goto label4;
         }

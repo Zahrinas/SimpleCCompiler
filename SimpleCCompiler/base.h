@@ -57,6 +57,8 @@ struct datum {
 	std::string getDataString();
 };
 
+int getBits(std::string s);
+
 template <typename T>
 tree<T>::tree(T data) : data(data), next(nullptr), child(nullptr) {
 }

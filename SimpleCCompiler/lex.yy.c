@@ -528,7 +528,7 @@ char *yytext;
 #line 2 "lex.l"
     #include <string.h>
     #include <malloc.h>
-    #include "yacc.tab.h"
+    #include "y.tab.h"
 
     char name[100];
     int val_int = 0;

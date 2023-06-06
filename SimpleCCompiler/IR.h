@@ -6,16 +6,11 @@
 #include "base.h"
 #include "AST.h"
 
-enum class ExpType {
-	constant, variable, voidtype
-};
-
 struct Expression {
 	std::string type;
 	std::string value;
 
 	Expression(std::string t, std::string v);
-	int bits();
 };
 
 struct binding {
@@ -32,6 +27,7 @@ struct IR_funct {
 	std::string type;
 	std::string name;
 	std::vector<std::string> args;
+	std::vector<std::string> regs;
 	std::vector<binding> bind;
 	std::map<std::string, int> labels;
 	std::map<std::string, std::string> alloc;

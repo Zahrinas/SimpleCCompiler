@@ -77,6 +77,7 @@ int storeOrSeq(char* src, int* cnt, char* name, int* andsize, int* orsize, int* 
 		src = &src[store(buf, src)];
 		
 		int mems;
+		mems = 10000;
 		
 		int i;
 		i = 1;
@@ -190,7 +191,7 @@ int SatisfiedAnd(int id, int* andlist, int* andnext, char* grade){
 	int ret;
 	ret = 1;
 	i = andlist[id];
-	
+	if(i == 10000) ret = 0;
 	label11:
 	if(id != 0){
 		if(grade[i] == 0) ret = 0;
@@ -241,21 +242,21 @@ int main(){
 	char* name;
 	char* s;
 	
-	orlist = malloc(5000);
+	orlist = malloc(10000);
 	s = orlist;
-	memset(s, 0, 5000);
-	ornext = malloc(5000);
+	memset(s, 0, 10000);
+	ornext = malloc(10000);
 	s = ornext;
-	memset(s, 0, 5000);
-	andlist = malloc(50000);
+	memset(s, 0, 10000);
+	andlist = malloc(100000);
 	s = andlist;
-	memset(s, 0, 50000);
-	andnext = malloc(50000);
+	memset(s, 0, 100000);
+	andnext = malloc(100000);
 	s = andnext;
-	memset(s, 0, 50000);
+	memset(s, 0, 100000);
 	
 	credit = malloc(1000);
-	orhead = malloc(500);
+	orhead = malloc(1000);
 	grade = malloc(200);
 	
 	input = malloc(200000);

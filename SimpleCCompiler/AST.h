@@ -9,6 +9,7 @@ struct AST_node {
 	AST_node(dataType t, datum v = datum());
 	std::string toLLVM_type();
 	std::string toStringExpr();
+	std::string toASMExpr();
 };
 
 typedef tree<AST_node> AST;

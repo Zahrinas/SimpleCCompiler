@@ -54,3 +54,11 @@ double datum::getDataDouble() {
 std::string datum::getDataString() {
 	return *(std::string*)ptr;
 }
+
+int getBits(std::string s){
+	if(s == "i8") return 8;
+	if(s == "i64") return 64;
+	if(s == "double") return 64;
+	if(s[s.length() - 1] == '*') return 64;
+	throw std::exception();
+}
