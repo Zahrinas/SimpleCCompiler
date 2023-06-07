@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <cstring>
 
 #include "ASM.h"
 
@@ -112,7 +113,7 @@ void ASMdata_RISCV::parseFunct(IR_funct fun, int funcTag){
 				ret.body.push_back("\tcall\tmemset@plt");
 			}
 			else{
-				char* stp = strchr(fun.body[i].c_str(), '(');
+				const char* stp = strchr(fun.body[i].c_str(), '(');
 				int argCnt = 0;
 				while(strchr(stp, '@')){
 					++stp;
@@ -427,7 +428,7 @@ void ASMdata_RISCV::parseFunct(IR_funct fun, int funcTag){
 					ret.body.push_back("\tsd\ta0,0(t0)");
 				}
 				else{
-					char* stp = strchr(fun.body[i].c_str(), '(');
+					const char* stp = strchr(fun.body[i].c_str(), '(');
 					int argCnt = 0;
 					while(stp && strchr(stp, '@')){
 						++stp;
