@@ -45,14 +45,12 @@ int store(char* tar, char* src){
 	return i;
 }
 
-int storeOrSeq(char* src, int* cnt, char* name, int* andsize, int* orsize, int* andlist, int* orlist, int* andnext, int* ornext){
+int storeOrSeq(char* src, int* cnt, char* name, int* andsize, int* orsize, int* andlist, int* orlist, int* andnext, int* ornext, char* buf){
 	int headand;
 	int heador;
 	int bfirst;
 	int cfirst;
 	int flag;
-	char* buf;
-	buf = malloc(20);
 	*orsize = *orsize + 1;
 	heador = *orsize;
 	bfirst = 1;
@@ -122,10 +120,10 @@ double getGPA(int* cnt, char* grade, double* credit){
 			flag = 1;
 			xcnt = xcnt + credit[i];
 		}
-		if(grade[i] == 65) sum = sum + credit[i] * 4.0;
-		if(grade[i] == 66) sum = sum + credit[i] * 3.0;
-		if(grade[i] == 67) sum = sum + credit[i] * 2.0;
-		if(grade[i] == 68) sum = sum + credit[i] * 1.0; 
+		if(grade[i] == 65) sum = sum + credit[i] + credit[i] + credit[i] + credit[i];
+		if(grade[i] == 66) sum = sum + credit[i] + credit[i] + credit[i];
+		if(grade[i] == 67) sum = sum + credit[i] + credit[i];
+		if(grade[i] == 68) sum = sum + credit[i]; 
 		i = i + 1;
 		goto label7;
 	}
@@ -240,20 +238,23 @@ int main(){
 	char* grade;
 	char* input;
 	char* name;
+	char* buf;
 	char* s;
+	char z;
 	
+	z = 0;
 	orlist = malloc(10000);
 	s = orlist;
-	memset(s, 0, 10000);
+	memset(s, z, 10000);
 	ornext = malloc(10000);
 	s = ornext;
-	memset(s, 0, 10000);
+	memset(s, z, 10000);
 	andlist = malloc(100000);
 	s = andlist;
-	memset(s, 0, 100000);
+	memset(s, z, 100000);
 	andnext = malloc(100000);
 	s = andnext;
-	memset(s, 0, 100000);
+	memset(s, z, 100000);
 	
 	credit = malloc(1000);
 	orhead = malloc(1000);
@@ -261,6 +262,7 @@ int main(){
 	
 	input = malloc(200000);
 	name = malloc(4000);
+	buf = malloc(20);
 	
 	cnt = 0;
 	xcnt = 0;
@@ -290,7 +292,6 @@ int main(){
 		goto label15;
 	}
 	
-	
 	i = 1;
 	
 	label16:
@@ -300,7 +301,7 @@ int main(){
 		s = &s[1];
 		sscanf(s, "%lf", &credit[i]);
 		s = strchr(s, 124);
-		orhead[i] = storeOrSeq(s, &cnt, name, &andsize, &orsize, andlist, orlist, andnext, ornext);
+		orhead[i] = storeOrSeq(s, &cnt, name, &andsize, &orsize, andlist, orlist, andnext, ornext, buf);
 		s = &s[1];
 		s = strchr(s, 124);
 		s = &s[1];

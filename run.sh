@@ -4,5 +4,5 @@ lex lex.l > out.txt
 yacc yacc.y > out.txt
 make all > out.txt
 ./gen data/Credit.c > out.txt
-clang gen.ll -o pr > out.txt
-./pr
+riscv64-linux-gnu-gcc gen.s -o gen > out.txt
+./gen

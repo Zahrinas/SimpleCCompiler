@@ -20,7 +20,7 @@ void ASMdata_RISCV::parseFunct(IR_funct fun, int funcTag){
 	stk += fun.instCnt;
 	
 	for(int i = 0; i < fun.body.size(); ++i){
-		if(strstr(fun.body[i].c_str(), "alloca")){
+		if(fun.body[i].find("alloca") != std::string::npos){
 			sscanf(fun.body[i].c_str(), "%%%d", &op1);
 			occu += 8, ret.space[op1] = occu;
 			++stk;
@@ -66,8 +66,17 @@ void ASMdata_RISCV::parseFunct(IR_funct fun, int funcTag){
 				ret.body.push_back("\tsd\tt2,0(t1)");
 			}
 			else if(strcmp(buf, "double") == 0){
-				
+				double rst;
+				sscanf(fun.body[i].c_str(), "store %*s %lf , %*s %%%d", &rst, &op2);
+				if(rst == 0){
+					ret.body.push_back("\tmv\tt2,zero");
+					ret.body.push_back("\tli\tt0," + std::to_string(-ret.alloc[op2]));
+					ret.body.push_back("\tadd\tt0,t0,fp");
+					ret.body.push_back("\tld\tt1,0(t0)");
+					ret.body.push_back("\tsd\tt2,0(t1)");
+				}else throw std::unexpected;
 			}
+			
 		}
 		else if(strcmp(buf, "br") == 0){
 			sscanf(fun.body[i].c_str(), "br %s", buf);
@@ -89,7 +98,20 @@ void ASMdata_RISCV::parseFunct(IR_funct fun, int funcTag){
 			ret.body.push_back("\tret");
 		}
 		else if(strcmp(buf, "call") == 0){
-			{
+			if(fun.body[i].find("memset") != std::string::npos){
+				sscanf(fun.body[i].c_str(), "call void (i8*, i8, i64) @memset (i8* %%%d , i8 %%%d , i64 %%%d)", &op1, &op2, &op3);
+				ret.body.push_back("\tli\tt0," + std::to_string(-ret.alloc[op1]));
+				ret.body.push_back("\tadd\tt0,t0,fp");
+				ret.body.push_back("\tld\ta0,0(t0)");
+				ret.body.push_back("\tli\tt0," + std::to_string(-ret.alloc[op2]));
+				ret.body.push_back("\tadd\tt0,t0,fp");
+				ret.body.push_back("\tld\ta1,0(t0)");
+				ret.body.push_back("\tli\tt0," + std::to_string(-ret.alloc[op3]));
+				ret.body.push_back("\tadd\tt0,t0,fp");
+				ret.body.push_back("\tld\ta2,0(t0)");
+				ret.body.push_back("\tcall\tmemset@plt");
+			}
+			else{
 				char* stp = strchr(fun.body[i].c_str(), '(');
 				int argCnt = 0;
 				while(strchr(stp, '@')){
@@ -146,6 +168,7 @@ void ASMdata_RISCV::parseFunct(IR_funct fun, int funcTag){
 				else if(strcmp(buf, "ne") == 0){
 					ret.body.push_back("\tbeq\tt1,t2,.L" + std::to_string(funcTag) + "_" + std::to_string(label));
 				}
+				
 			}
 			else if(strcmp(buf, "add") == 0){
 				sscanf(fun.body[i].c_str(), "%%%*d = add %s %%%d , %%%d", buf, &op2, &op3);
@@ -199,18 +222,72 @@ void ASMdata_RISCV::parseFunct(IR_funct fun, int funcTag){
 				ret.body.push_back("\tadd\tt0,t0,fp");
 				ret.body.push_back("\tsd\tt1,0(t0)");
 			}
+			else if(strcmp(buf, "fadd") == 0){
+				sscanf(fun.body[i].c_str(), "%%%*d = fadd %s %%%d , %%%d", buf, &op2, &op3);
+				ret.body.push_back("\tli\tt0," + std::to_string(-ret.alloc[op2]));
+				ret.body.push_back("\tadd\tt0,t0,fp");
+				ret.body.push_back("\tfld\tfa0,0(t0)");
+				ret.body.push_back("\tli\tt0," + std::to_string(-ret.alloc[op3]));
+				ret.body.push_back("\tadd\tt0,t0,fp");
+				ret.body.push_back("\tfld\tfa1,0(t0)");
+				ret.body.push_back("\tfadd.d\tfa0,fa0,fa1");
+				ret.body.push_back("\tli\tt0," + std::to_string(-ret.alloc[op1]));
+				ret.body.push_back("\tadd\tt0,t0,fp");
+				ret.body.push_back("\tfsd\tfa0,0(t0)");
+			}
+			else if(strcmp(buf, "fsub") == 0){
+				sscanf(fun.body[i].c_str(), "%%%*d = fsub %s %%%d , %%%d", buf, &op2, &op3);
+				ret.body.push_back("\tli\tt0," + std::to_string(-ret.alloc[op2]));
+				ret.body.push_back("\tadd\tt0,t0,fp");
+				ret.body.push_back("\tfld\tfa0,0(t0)");
+				ret.body.push_back("\tli\tt0," + std::to_string(-ret.alloc[op3]));
+				ret.body.push_back("\tadd\tt0,t0,fp");
+				ret.body.push_back("\tfld\tfa1,0(t0)");
+				ret.body.push_back("\tfsub.d\tfa0,fa0,fa1");
+				ret.body.push_back("\tli\tt0," + std::to_string(-ret.alloc[op1]));
+				ret.body.push_back("\tadd\tt0,t0,fp");
+				ret.body.push_back("\tfsd\tfa0,0(t0)");
+			}
+			else if(strcmp(buf, "fmul") == 0){
+				sscanf(fun.body[i].c_str(), "%%%*d = fmul %s %%%d , %%%d", buf, &op2, &op3);
+				ret.body.push_back("\tli\tt0," + std::to_string(-ret.alloc[op2]));
+				ret.body.push_back("\tadd\tt0,t0,fp");
+				ret.body.push_back("\tfld\tfa0,0(t0)");
+				ret.body.push_back("\tli\tt0," + std::to_string(-ret.alloc[op3]));
+				ret.body.push_back("\tadd\tt0,t0,fp");
+				ret.body.push_back("\tfld\tfa1,0(t0)");
+				ret.body.push_back("\tfmul.d\tfa0,fa0,fa1");
+				ret.body.push_back("\tli\tt0," + std::to_string(-ret.alloc[op1]));
+				ret.body.push_back("\tadd\tt0,t0,fp");
+				ret.body.push_back("\tfsd\tfa0,0(t0)");
+			}
+			else if(strcmp(buf, "fdiv") == 0){
+				sscanf(fun.body[i].c_str(), "%%%*d = fdiv %s %%%d , %%%d", buf, &op2, &op3);
+				ret.body.push_back("\tli\tt0," + std::to_string(-ret.alloc[op2]));
+				ret.body.push_back("\tadd\tt0,t0,fp");
+				ret.body.push_back("\tfld\tfa0,0(t0)");
+				ret.body.push_back("\tli\tt0," + std::to_string(-ret.alloc[op3]));
+				ret.body.push_back("\tadd\tt0,t0,fp");
+				ret.body.push_back("\tfld\tfa1,0(t0)");
+				ret.body.push_back("\tfdiv.d\tfa0,fa0,fa1");
+				ret.body.push_back("\tli\tt0," + std::to_string(-ret.alloc[op1]));
+				ret.body.push_back("\tadd\tt0,t0,fp");
+				ret.body.push_back("\tfsd\tfa0,0(t0)");
+			}
 			else if(strcmp(buf, "alloca") == 0){
 				ret.body.push_back("\tli\tt0," + std::to_string(-ret.space[op1]));
 				ret.body.push_back("\tadd\tt1,t0,fp");
 				ret.body.push_back("\tli\tt0," + std::to_string(-ret.alloc[op1]));
 				ret.body.push_back("\tadd\tt0,t0,fp");
 				ret.body.push_back("\tsd\tt1,0(t0)");
-			}else if(strcmp(buf, "load") == 0){
+			}
+			else if(strcmp(buf, "load") == 0){
 				sscanf(fun.body[i].c_str(), "%%%*d = load %s , %*s %%%d", buf, &op2);
 				ret.body.push_back("\tli\tt0," + std::to_string(-ret.alloc[op2]));
 				ret.body.push_back("\tadd\tt0,t0,fp");
 				ret.body.push_back("\tld\tt1,0(t0)");
-				ret.body.push_back("\tld\tt1,0(t1)");
+				if(strcmp(buf, "i8") == 0) ret.body.push_back("\tlb\tt1,0(t1)");
+				else ret.body.push_back("\tld\tt1,0(t1)");
 				ret.body.push_back("\tli\tt0," + std::to_string(-ret.alloc[op1]));
 				ret.body.push_back("\tadd\tt0,t0,fp");
 				ret.body.push_back("\tsd\tt1,0(t0)");
@@ -232,9 +309,6 @@ void ASMdata_RISCV::parseFunct(IR_funct fun, int funcTag){
 					ret.body.push_back("\tadd\tt0,t0,fp");
 					ret.body.push_back("\tld\tt2,0(t0)");
 					if(getBits(buf2) == 64) ret.body.push_back("\tslli\tt2,t2,3");
-					else{
-						
-					}
 					ret.body.push_back("\tadd\tt1,t1,t2");
 					ret.body.push_back("\tli\tt0," + std::to_string(-ret.alloc[op1]));
 					ret.body.push_back("\tadd\tt0,t0,fp");
@@ -250,9 +324,36 @@ void ASMdata_RISCV::parseFunct(IR_funct fun, int funcTag){
 				ret.body.push_back("\tadd\tt0,t0,fp");
 				ret.body.push_back("\tsd\tt1,0(t0)");
 			}
+			else if(strcmp(buf, "trunc") == 0){
+				sscanf(fun.body[i].c_str(), "%%%d = trunc %*s %%%d to %*s", &op1, &op2);
+				ret.body.push_back("\tli\tt0," + std::to_string(-ret.alloc[op2]));
+				ret.body.push_back("\tadd\tt0,t0,fp");
+				ret.body.push_back("\tld\tt1,0(t0)");
+				ret.body.push_back("\tsext.b\tt1,t1");
+				ret.body.push_back("\tli\tt0," + std::to_string(-ret.alloc[op1]));
+				ret.body.push_back("\tadd\tt0,t0,fp");
+				ret.body.push_back("\tsd\tt1,0(t0)");
+			}
 			else if(strcmp(buf, "call") == 0){
-				if(fun.body[i].find("scanf") != std::string::npos){
-					sscanf(fun.body[i].c_str(), "%%%d = call i64 (i8*, ...) @scanf (%s %%%d , %s %%%d)", &op1, buf2, &op2, buf3, &op3);
+				if(fun.body[i].find("sscanf") != std::string::npos){
+					int op4;
+					sscanf(fun.body[i].c_str(), "%%%d = call i64 (i8*, i8*, ...) @sscanf (i8* %%%d , i8* %%%d , %*s %%%d)", &op1, &op2, &op3, &op4);
+					ret.body.push_back("\tli\tt0," + std::to_string(-ret.alloc[op2]));
+					ret.body.push_back("\tadd\tt0,t0,fp");
+					ret.body.push_back("\tld\ta0,0(t0)");
+					ret.body.push_back("\tli\tt0," + std::to_string(-ret.alloc[op3]));
+					ret.body.push_back("\tadd\tt0,t0,fp");
+					ret.body.push_back("\tld\ta1,0(t0)");
+					ret.body.push_back("\tli\tt0," + std::to_string(-ret.alloc[op4]));
+					ret.body.push_back("\tadd\tt0,t0,fp");
+					ret.body.push_back("\tld\ta2,0(t0)");
+					ret.body.push_back("\tcall\tsscanf@plt");
+					ret.body.push_back("\tli\tt0," + std::to_string(-ret.alloc[op1]));
+					ret.body.push_back("\tadd\tt0,t0,fp");
+					ret.body.push_back("\tsd\ta0,0(t0)");
+				}
+				else if(fun.body[i].find("scanf") != std::string::npos){
+					sscanf(fun.body[i].c_str(), "%%%d = call i64 (i8*, ...) @scanf (i8* %%%d , %*s %%%d)", &op1, &op2, &op3);
 					ret.body.push_back("\tli\tt0," + std::to_string(-ret.alloc[op2]));
 					ret.body.push_back("\tadd\tt0,t0,fp");
 					ret.body.push_back("\tld\ta0,0(t0)");
@@ -265,11 +366,11 @@ void ASMdata_RISCV::parseFunct(IR_funct fun, int funcTag){
 					ret.body.push_back("\tsd\ta0,0(t0)");
 				}
 				else if(fun.body[i].find("printf") != std::string::npos){
-					int rd = sscanf(fun.body[i].c_str(), "%%%d = call i64 (i8*, ...) @printf (%s %%%d , %s %%%d)", &op1, buf2, &op2, buf3, &op3);
+					int rd = sscanf(fun.body[i].c_str(), "%%%d = call i64 (i8*, ...) @printf (i8* %%%d , %*s %%%d)", &op1, &op2, &op3);
 					ret.body.push_back("\tli\tt0," + std::to_string(-ret.alloc[op2]));
 					ret.body.push_back("\tadd\tt0,t0,fp");
 					ret.body.push_back("\tld\ta0,0(t0)");
-					if(rd == 5){
+					if(rd == 3){
 						ret.body.push_back("\tli\tt0," + std::to_string(-ret.alloc[op3]));
 						ret.body.push_back("\tadd\tt0,t0,fp");
 						ret.body.push_back("\tld\ta1,0(t0)");
@@ -285,6 +386,42 @@ void ASMdata_RISCV::parseFunct(IR_funct fun, int funcTag){
 					ret.body.push_back("\tadd\tt0,t0,fp");
 					ret.body.push_back("\tld\ta0,0(t0)");
 					ret.body.push_back("\tcall\tmalloc@plt");
+					ret.body.push_back("\tli\tt0," + std::to_string(-ret.alloc[op1]));
+					ret.body.push_back("\tadd\tt0,t0,fp");
+					ret.body.push_back("\tsd\ta0,0(t0)");
+				}
+				else if(fun.body[i].find("strchr") != std::string::npos){
+					sscanf(fun.body[i].c_str(), "%%%d = call i8* (i8*, i64) @strchr (i8* %%%d , i64 %%%d)", &op1, &op2, &op3);
+					ret.body.push_back("\tli\tt0," + std::to_string(-ret.alloc[op2]));
+					ret.body.push_back("\tadd\tt0,t0,fp");
+					ret.body.push_back("\tld\ta0,0(t0)");
+					ret.body.push_back("\tli\tt0," + std::to_string(-ret.alloc[op3]));
+					ret.body.push_back("\tadd\tt0,t0,fp");
+					ret.body.push_back("\tld\ta1,0(t0)");
+					ret.body.push_back("\tcall\tstrchr@plt");
+					ret.body.push_back("\tli\tt0," + std::to_string(-ret.alloc[op1]));
+					ret.body.push_back("\tadd\tt0,t0,fp");
+					ret.body.push_back("\tsd\ta0,0(t0)");
+				}
+				else if(fun.body[i].find("strcmp") != std::string::npos){
+					sscanf(fun.body[i].c_str(), "%%%d = call i64 (i8*, i8*) @strcmp (i8* %%%d , i8* %%%d)", &op1, &op2, &op3);
+					ret.body.push_back("\tli\tt0," + std::to_string(-ret.alloc[op2]));
+					ret.body.push_back("\tadd\tt0,t0,fp");
+					ret.body.push_back("\tld\ta0,0(t0)");
+					ret.body.push_back("\tli\tt0," + std::to_string(-ret.alloc[op3]));
+					ret.body.push_back("\tadd\tt0,t0,fp");
+					ret.body.push_back("\tld\ta1,0(t0)");
+					ret.body.push_back("\tcall\tstrcmp@plt");
+					ret.body.push_back("\tli\tt0," + std::to_string(-ret.alloc[op1]));
+					ret.body.push_back("\tadd\tt0,t0,fp");
+					ret.body.push_back("\tsd\ta0,0(t0)");
+				}
+				else if(fun.body[i].find("gets") != std::string::npos){
+					sscanf(fun.body[i].c_str(), "%%%d = call i64 (...) @gets (i8* %%%d)", &op1, &op2);
+					ret.body.push_back("\tli\tt0," + std::to_string(-ret.alloc[op2]));
+					ret.body.push_back("\tadd\tt0,t0,fp");
+					ret.body.push_back("\tld\ta0,0(t0)");
+					ret.body.push_back("\tcall\tgets@plt");
 					ret.body.push_back("\tli\tt0," + std::to_string(-ret.alloc[op1]));
 					ret.body.push_back("\tadd\tt0,t0,fp");
 					ret.body.push_back("\tsd\ta0,0(t0)");
